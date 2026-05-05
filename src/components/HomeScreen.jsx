@@ -93,13 +93,16 @@ function HomeScreen({ user }) {
           </div>
 
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => setShowSeedPanel(!showSeedPanel)}
-              className="p-2 rounded-lg border border-fwc-border hover:border-fwc-neon hover:text-fwc-neon transition-colors"
-              title="Panel de Administración"
-            >
-              <Database className="w-5 h-5" />
-            </button>
+            {/* Panel de admin (solo visible para el creador) */}
+            {user.email === 'jose.timpe@gmail.com' && (
+              <button
+                onClick={() => setShowSeedPanel(!showSeedPanel)}
+                className="p-2 rounded-lg border border-fwc-border hover:border-fwc-neon hover:text-fwc-neon transition-colors"
+                title="Panel de Administración"
+              >
+                <Database className="w-5 h-5" />
+              </button>
+            )}
 
             <div className="flex items-center gap-3">
               {user.photoURL ? (
