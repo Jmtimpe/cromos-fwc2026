@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Users, UserPlus, Search, Copy, Check, X, 
-  Loader2, AlertCircle, CheckCircle2, UserMinus, Eye
+  Loader2, AlertCircle, CheckCircle2, UserMinus, Eye,
+  Share2, Link2
 } from 'lucide-react';
 import { obtenerMiPerfil, buscarPorCodigo } from '../lib/perfilUsuario';
 import { agregarAmigo, eliminarAmigo, observarAmigos } from '../lib/amigos';
@@ -16,6 +17,8 @@ function PantallaAmigos({ user, onVerAmigo }) {
   const [buscando, setBuscando] = useState(false);
   const [resultadoBusqueda, setResultadoBusqueda] = useState(null);
   const [mensaje, setMensaje] = useState({ tipo: '', texto: '' });
+  const [linkCopiado, setLinkCopiado] = useState(false);
+  const yaProceseInvitacion = useRef(false);
 
   useEffect(() => {
     const cargar = async () => {
@@ -27,6 +30,46 @@ function PantallaAmigos({ user, onVerAmigo }) {
     };
     cargar();
   }, [user.uid]);
+  // Detectar si vino con un link de invitación (?invitar=CODIGO)
+  useEffect(() => {
+    if (loading || yaProceseInvitacion.current) return;
+    
+    const params = new URLSearchParams(window.location.search);
+    const codigoInvitacion = params.get('invitar');
+    
+    if (codigoInvitacion && miPerfil) {
+      yaProceseInvitacion.current = true;
+      // Auto-buscar el código de invitación
+      setCodigoBuscar(codigoInvitacion.toUpperCase());
+      
+      // Disparar la búsqueda automáticamente después de 500ms
+      setTimeout(async () => {
+        setBuscando(true);
+        setMensaje({ tipo: 'info', texto: `Buscando a tu amigo con código ${codigoInvitacion.toUpperCase()}...` });
+        
+        const result = await buscarPorCodigo(codigoInvitacion);
+        
+        if (result.success) {
+          if (result.usuario.uid === user.uid) {
+            setMensaje({ tipo: 'info', texto: '¡Ese es tu propio link! Compártelo con tus amigos 😄' });
+          } else if (amigos.some(a => a.uid === result.usuario.uid)) {
+            setMensaje({ tipo: 'info', texto: `${result.usuario.displayName} ya está en tu red ✨` });
+          } else {
+            setResultadoBusqueda(result.usuario);
+            setMensaje({ tipo: 'exito', texto: `¡${result.usuario.displayName} listo para agregar!` });
+          }
+        } else {
+          setMensaje({ tipo: 'error', texto: 'No encontramos a nadie con ese código. Verifica que sea correcto.' });
+        }
+        
+        setBuscando(false);
+        
+        // Limpiar el parámetro de la URL para que no quede colgado
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, '', newUrl);
+      }, 500);
+    }
+  }, [loading, miPerfil, amigos, user.uid]);
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -34,13 +77,48 @@ function PantallaAmigos({ user, onVerAmigo }) {
     return () => unsubscribe();
   }, [user.uid]);
 
-  const copiarCodigo = async () => {
+  // Copiar el LINK mágico de invitación
+  const copiarLinkInvitacion = async () => {
     try {
-      await navigator.clipboard.writeText(miPerfil.codigoInvitacion);
-      setCodigoCopiado(true);
-      setTimeout(() => setCodigoCopiado(false), 2000);
+      const baseUrl = window.location.origin + window.location.pathname;
+      const link = `${baseUrl}?invitar=${miPerfil.codigoInvitacion}`;
+      await navigator.clipboard.writeText(link);
+      setLinkCopiado(true);
+      setTimeout(() => setLinkCopiado(false), 2500);
     } catch (error) {
-      console.error('Error copiando:', error);
+      console.error('Error copiando link:', error);
+    }
+  };
+
+  // Compartir vía WhatsApp/SMS/etc usando Web Share API (móvil)
+  const compartirInvitacion = async () => {
+    const baseUrl = window.location.origin + window.location.pathname;
+    const link = `${baseUrl}?invitar=${miPerfil.codigoInvitacion}`;
+    const texto = `¡Hola! Te invito a Cromos FWC2026 ⚽🏆\n\nGestiona tu colección del Mundial 2026 e intercambia repetidos conmigo.\n\nEntra con este link y se conectarán nuestras redes automáticamente:\n${link}`;
+    
+    // Intentar usar la API de compartir nativa (móvil)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Cromos FWC2026',
+          text: texto,
+          url: link
+        });
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('Error compartiendo:', error);
+          await copiarLinkInvitacion();
+        }
+      }
+    } else {
+      // Si no hay API nativa, copiar al portapapeles
+      try {
+        await navigator.clipboard.writeText(texto);
+        setLinkCopiado(true);
+        setTimeout(() => setLinkCopiado(false), 2500);
+      } catch (e) {
+        console.error('Error:', e);
+      }
     }
   };
 
@@ -121,17 +199,17 @@ function PantallaAmigos({ user, onVerAmigo }) {
           </h3>
         </div>
 
-        <div className="bg-fwc-bg/50 border border-fwc-gold/30 rounded-lg p-5">
+        <div className="bg-fwc-bg/50 border border-fwc-gold/30 rounded-lg p-4 sm:p-5">
           <p className="text-gray-400 text-xs uppercase tracking-widest mb-2">
             Tu código de invitación
           </p>
-          <div className="flex items-center justify-between gap-3">
-            <p className="font-display font-black text-3xl text-fwc-gold tracking-wider">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <p className="font-display font-black text-2xl sm:text-3xl text-fwc-gold tracking-wider truncate">
               {miPerfil?.codigoInvitacion || '...'}
             </p>
             <button
               onClick={copiarCodigo}
-              className="p-3 bg-fwc-card border border-fwc-border hover:border-fwc-neon hover:text-fwc-neon rounded-lg transition-all"
+              className="p-2.5 sm:p-3 bg-fwc-card border border-fwc-border hover:border-fwc-neon hover:text-fwc-neon rounded-lg transition-all flex-shrink-0"
               title="Copiar código"
             >
               {codigoCopiado ? (
@@ -141,8 +219,37 @@ function PantallaAmigos({ user, onVerAmigo }) {
               )}
             </button>
           </div>
+
+          {/* Botones de invitación */}
+          <div className="flex flex-col sm:flex-row gap-2">
+            <button
+              onClick={compartirInvitacion}
+              className="flex-1 bg-fwc-gold hover:bg-yellow-500 text-fwc-bg font-display font-bold uppercase tracking-wider py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2 text-sm"
+            >
+              <Share2 className="w-4 h-4" />
+              Compartir invitación
+            </button>
+            <button
+              onClick={copiarLinkInvitacion}
+              className="px-4 py-3 bg-fwc-card border border-fwc-border hover:border-fwc-neon hover:text-fwc-neon rounded-lg transition-all flex items-center justify-center gap-2 text-sm font-bold uppercase tracking-wider"
+              title="Copiar link de invitación"
+            >
+              {linkCopiado ? (
+                <>
+                  <Check className="w-4 h-4 text-green-400" />
+                  <span className="text-green-400">¡Copiado!</span>
+                </>
+              ) : (
+                <>
+                  <Link2 className="w-4 h-4" />
+                  Copiar link
+                </>
+              )}
+            </button>
+          </div>
+
           <p className="text-gray-500 text-xs mt-3">
-            Comparte este código con tus amigos para que te agreguen a su red
+            💡 Comparte el link y tus amigos serán agregados con un solo clic
           </p>
         </div>
       </div>

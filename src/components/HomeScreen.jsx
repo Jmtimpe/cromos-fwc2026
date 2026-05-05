@@ -124,36 +124,36 @@ function HomeScreen({ user }) {
           </div>
         </div>
 
-        {!showSeedPanel && !amigoVisualizando && (
+        {!showSeedPanel && (
           <div className="max-w-7xl mx-auto px-3 sm:px-6 flex gap-1 -mb-px overflow-x-auto scrollbar-hide">
             <PestañaBtn
-              activa={pestañaActiva === 'album'}
-              onClick={() => setPestañaActiva('album')}
+              activa={pestañaActiva === 'album' && !amigoVisualizando}
+              onClick={() => { setPestañaActiva('album'); setAmigoVisualizando(null); }}
               icon={<BookOpen className="w-4 h-4" />}
               label="Mi Álbum"
             />
             <PestañaBtn
-              activa={pestañaActiva === 'amigos'}
-              onClick={() => setPestañaActiva('amigos')}
+              activa={pestañaActiva === 'amigos' && !amigoVisualizando}
+              onClick={() => { setPestañaActiva('amigos'); setAmigoVisualizando(null); }}
               icon={<Users className="w-4 h-4" />}
               label="Amigos"
             />
             <PestañaBtn
-              activa={pestañaActiva === 'pedidos'}
-              onClick={() => setPestañaActiva('pedidos')}
+              activa={pestañaActiva === 'pedidos' && !amigoVisualizando}
+              onClick={() => { setPestañaActiva('pedidos'); setAmigoVisualizando(null); }}
               icon={<ShoppingCart className="w-4 h-4" />}
               label="Pedidos"
               badge={pedidosPendientes > 0 ? pedidosPendientes : null}
             />
             <PestañaBtn
-              activa={pestañaActiva === 'hoy'}
-              onClick={() => setPestañaActiva('hoy')}
+              activa={pestañaActiva === 'hoy' && !amigoVisualizando}
+              onClick={() => { setPestañaActiva('hoy'); setAmigoVisualizando(null); }}
               icon={<Sun className="w-4 h-4" />}
               label="Hoy"
             />
             <PestañaBtn
-              activa={pestañaActiva === 'calendario'}
-              onClick={() => setPestañaActiva('calendario')}
+              activa={pestañaActiva === 'calendario' && !amigoVisualizando}
+              onClick={() => { setPestañaActiva('calendario'); setAmigoVisualizando(null); }}
               icon={<Calendar className="w-4 h-4" />}
               label="Calendario"
             />
