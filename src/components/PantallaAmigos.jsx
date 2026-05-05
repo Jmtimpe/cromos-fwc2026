@@ -1,8 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Users, UserPlus, Search, Copy, Check, X, 
-  Loader2, AlertCircle, CheckCircle2, UserMinus, Eye,
-  Share2, Link2
+import {
+  Users,
+  UserPlus,
+  Search,
+  Copy,
+  Check,
+  X,
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  UserMinus,
+  Eye,
+  Share2,
+  Link2,
 } from 'lucide-react';
 import { obtenerMiPerfil, buscarPorCodigo } from '../lib/perfilUsuario';
 import { agregarAmigo, eliminarAmigo, observarAmigos } from '../lib/amigos';
@@ -12,98 +22,130 @@ function PantallaAmigos({ user, onVerAmigo }) {
   const [amigos, setAmigos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [codigoCopiado, setCodigoCopiado] = useState(false);
-  
+  const [linkCopiado, setLinkCopiado] = useState(false);
   const [codigoBuscar, setCodigoBuscar] = useState('');
   const [buscando, setBuscando] = useState(false);
   const [resultadoBusqueda, setResultadoBusqueda] = useState(null);
   const [mensaje, setMensaje] = useState({ tipo: '', texto: '' });
-  const [linkCopiado, setLinkCopiado] = useState(false);
   const yaProceseInvitacion = useRef(false);
 
+  // Cargar perfil del usuario
   useEffect(() => {
+    let cancelado = false;
     const cargar = async () => {
-      const result = await obtenerMiPerfil(user.uid);
-      if (result.success) {
-        setMiPerfil(result.perfil);
+      try {
+        const result = await obtenerMiPerfil(user.uid);
+        if (!cancelado && result.success) {
+          setMiPerfil(result.perfil);
+        }
+      } catch (e) {
+        console.error('Error cargando perfil:', e);
+      } finally {
+        if (!cancelado) setLoading(false);
       }
-      setLoading(false);
     };
     cargar();
+    return () => {
+      cancelado = true;
+    };
   }, [user.uid]);
-  // Detectar si vino con un link de invitación (?invitar=CODIGO)
+
+  // Listener de amigos en tiempo real
   useEffect(() => {
-    if (loading || yaProceseInvitacion.current || !miPerfil) return;
-    
+    if (!user?.uid) return;
+    const unsubscribe = observarAmigos(user.uid, setAmigos);
+    return () => unsubscribe();
+  }, [user?.uid]);
+
+  // Detectar link mágico de invitación (?invitar=CODIGO)
+  useEffect(() => {
+    if (loading || !miPerfil || yaProceseInvitacion.current) return;
+
     let codigoInvitacion = null;
     try {
-      const params = new URLSearchParams(window.location.search);
+      const params = new URLSearchParams(window.location.search || '');
       codigoInvitacion = params.get('invitar');
     } catch (e) {
       console.error('Error leyendo URL:', e);
       return;
     }
-    
-    if (!codigoInvitacion || codigoInvitacion.trim() === '') {
-      // Si hay un "?" vacío en la URL, limpiarlo
-      if (window.location.search) {
-        try {
+
+    if (!codigoInvitacion) {
+      try {
+        if (window.location.search) {
           window.history.replaceState({}, '', window.location.pathname);
-        } catch (e) {
-          console.error('Error limpiando URL:', e);
         }
+      } catch (e) {
+        console.error('Error limpiando URL:', e);
       }
       return;
     }
-    
+
     yaProceseInvitacion.current = true;
     const codigoLimpio = codigoInvitacion.toUpperCase().trim();
+
+    try {
+      window.history.replaceState({}, '', window.location.pathname);
+    } catch (e) {
+      console.error('Error limpiando URL:', e);
+    }
+
+    if (codigoLimpio === '' || codigoLimpio === miPerfil.codigoInvitacion) {
+      return;
+    }
+
     setCodigoBuscar(codigoLimpio);
-    
-    // Disparar la búsqueda automáticamente
-    const timer = setTimeout(async () => {
+
+    const procesarInvitacion = async () => {
       try {
         setBuscando(true);
-        setMensaje({ tipo: 'info', texto: `Buscando a tu amigo con código ${codigoLimpio}...` });
-        
+        setMensaje({ tipo: 'info', texto: `Buscando código ${codigoLimpio}...` });
         const result = await buscarPorCodigo(codigoLimpio);
-        
-        if (result.success) {
+        if (result.success && result.usuario) {
           if (result.usuario.uid === user.uid) {
-            setMensaje({ tipo: 'info', texto: '¡Ese es tu propio link! Compártelo con tus amigos 😄' });
-          } else if (amigos.some(a => a.uid === result.usuario.uid)) {
-            setMensaje({ tipo: 'info', texto: `${result.usuario.displayName} ya está en tu red ✨` });
+            setMensaje({ tipo: 'info', texto: '¡Ese es tu propio código! 😄' });
+          } else if (amigos.some((a) => a.uid === result.usuario.uid)) {
+            setMensaje({
+              tipo: 'info',
+              texto: `${result.usuario.displayName} ya está en tu red ✨`,
+            });
           } else {
             setResultadoBusqueda(result.usuario);
-            setMensaje({ tipo: 'exito', texto: `¡${result.usuario.displayName} listo para agregar!` });
+            setMensaje({
+              tipo: 'exito',
+              texto: `¡${result.usuario.displayName} listo para agregar!`,
+            });
           }
         } else {
-          setMensaje({ tipo: 'error', texto: 'No encontramos a nadie con ese código. Verifica que sea correcto.' });
+          setMensaje({ tipo: 'error', texto: 'No encontramos a nadie con ese código.' });
         }
       } catch (error) {
         console.error('Error procesando invitación:', error);
-        setMensaje({ tipo: 'error', texto: 'Hubo un error procesando la invitación. Intenta de nuevo.' });
+        setMensaje({ tipo: 'error', texto: 'Error procesando la invitación.' });
       } finally {
         setBuscando(false);
-        // Limpiar el parámetro de la URL
-        try {
-          window.history.replaceState({}, '', window.location.pathname);
-        } catch (e) {
-          console.error('Error limpiando URL:', e);
-        }
       }
-    }, 800);
-    
+    };
+
+    const timer = setTimeout(procesarInvitacion, 800);
     return () => clearTimeout(timer);
-  }, [loading, miPerfil, amigos, user.uid]);
+  }, [loading, miPerfil]);
 
-  useEffect(() => {
-    if (!user?.uid) return;
-    const unsubscribe = observarAmigos(user.uid, setAmigos);
-    return () => unsubscribe();
-  }, [user.uid]);
+  // Copiar código al portapapeles
+  const copiarCodigo = async () => {
+    if (!miPerfil?.codigoInvitacion) return;
+    try {
+      await navigator.clipboard.writeText(miPerfil.codigoInvitacion);
+      setCodigoCopiado(true);
+      setTimeout(() => setCodigoCopiado(false), 2000);
+    } catch (error) {
+      console.error('Error copiando código:', error);
+    }
+  };
 
-  // Copiar el LINK mágico de invitación
+  // Copiar link mágico al portapapeles
   const copiarLinkInvitacion = async () => {
+    if (!miPerfil?.codigoInvitacion) return;
     try {
       const baseUrl = window.location.origin + window.location.pathname;
       const link = `${baseUrl}?invitar=${miPerfil.codigoInvitacion}`;
@@ -115,28 +157,26 @@ function PantallaAmigos({ user, onVerAmigo }) {
     }
   };
 
-  // Compartir vía WhatsApp/SMS/etc usando Web Share API (móvil)
+  // Compartir invitación con menú nativo (móvil) o copiar al portapapeles
   const compartirInvitacion = async () => {
+    if (!miPerfil?.codigoInvitacion) return;
     const baseUrl = window.location.origin + window.location.pathname;
     const link = `${baseUrl}?invitar=${miPerfil.codigoInvitacion}`;
-    const texto = `¡Hola! Te invito a Cromos FWC2026 ⚽🏆\n\nGestiona tu colección del Mundial 2026 e intercambia repetidos conmigo.\n\nEntra con este link y se conectarán nuestras redes automáticamente:\n${link}`;
-    
-    // Intentar usar la API de compartir nativa (móvil)
+    const texto = `¡Hola! Te invito a Cromos FWC2026 ⚽🏆\n\nGestiona tu colección del Mundial 2026 e intercambia repetidos conmigo.\n\nEntra con este link y nos conectaremos automáticamente:\n${link}`;
+
     if (navigator.share) {
       try {
         await navigator.share({
           title: 'Cromos FWC2026',
           text: texto,
-          url: link
+          url: link,
         });
       } catch (error) {
         if (error.name !== 'AbortError') {
-          console.error('Error compartiendo:', error);
           await copiarLinkInvitacion();
         }
       }
     } else {
-      // Si no hay API nativa, copiar al portapapeles
       try {
         await navigator.clipboard.writeText(texto);
         setLinkCopiado(true);
@@ -147,46 +187,43 @@ function PantallaAmigos({ user, onVerAmigo }) {
     }
   };
 
+  // Buscar usuario por código manualmente
   const handleBuscar = async () => {
     if (!codigoBuscar.trim()) return;
-    
     setBuscando(true);
     setResultadoBusqueda(null);
     setMensaje({ tipo: '', texto: '' });
-
     const result = await buscarPorCodigo(codigoBuscar);
-    
     if (result.success) {
       if (result.usuario.uid === user.uid) {
         setMensaje({ tipo: 'error', texto: 'Ese es tu propio código 😄' });
-      } 
-      else if (amigos.some(a => a.uid === result.usuario.uid)) {
-        setMensaje({ tipo: 'info', texto: `${result.usuario.displayName} ya está en tu red` });
-      } 
-      else {
+      } else if (amigos.some((a) => a.uid === result.usuario.uid)) {
+        setMensaje({
+          tipo: 'info',
+          texto: `${result.usuario.displayName} ya está en tu red`,
+        });
+      } else {
         setResultadoBusqueda(result.usuario);
       }
     } else {
       setMensaje({ tipo: 'error', texto: result.error });
     }
-    
     setBuscando(false);
   };
 
+  // Agregar amigo encontrado
   const handleAgregar = async () => {
     if (!resultadoBusqueda || !miPerfil) return;
-    
     const result = await agregarAmigo(
-      user.uid, 
-      resultadoBusqueda.uid, 
-      miPerfil, 
+      user.uid,
+      resultadoBusqueda.uid,
+      miPerfil,
       resultadoBusqueda
     );
-    
     if (result.success) {
-      setMensaje({ 
-        tipo: 'exito', 
-        texto: `¡${resultadoBusqueda.displayName} agregado a tu red! 🎉` 
+      setMensaje({
+        tipo: 'exito',
+        texto: `¡${resultadoBusqueda.displayName} agregado a tu red! 🎉`,
       });
       setResultadoBusqueda(null);
       setCodigoBuscar('');
@@ -196,11 +233,13 @@ function PantallaAmigos({ user, onVerAmigo }) {
     }
   };
 
+  // Eliminar amigo
   const handleEliminar = async (amigo) => {
     if (!window.confirm(`¿Quitar a ${amigo.displayName} de tu red?`)) return;
     await eliminarAmigo(user.uid, amigo.uid);
   };
 
+  // Loading inicial
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
@@ -212,16 +251,25 @@ function PantallaAmigos({ user, onVerAmigo }) {
     );
   }
 
+  // Si no hay perfil, mostrar mensaje en vez de pantalla negra
+  if (!miPerfil) {
+    return (
+      <div className="fwc-card p-12 text-center">
+        <AlertCircle className="w-12 h-12 text-fwc-accent mx-auto mb-4" />
+        <p className="text-gray-400">
+          No se pudo cargar tu perfil. Intenta refrescar la página.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      
-      {/* Mi Perfil con Código de Invitación */}
+      {/* Mi Red - Código de Invitación */}
       <div className="fwc-card p-6">
         <div className="flex items-center gap-3 mb-4">
           <Users className="w-6 h-6 text-fwc-gold" />
-          <h3 className="font-display font-bold text-xl text-white">
-            Mi Red
-          </h3>
+          <h3 className="font-display font-bold text-xl text-white">Mi Red</h3>
         </div>
 
         <div className="bg-fwc-bg/50 border border-fwc-gold/30 rounded-lg p-4 sm:p-5">
@@ -230,7 +278,7 @@ function PantallaAmigos({ user, onVerAmigo }) {
           </p>
           <div className="flex items-center justify-between gap-3 mb-4">
             <p className="font-display font-black text-2xl sm:text-3xl text-fwc-gold tracking-wider truncate">
-              {miPerfil?.codigoInvitacion || '...'}
+              {miPerfil.codigoInvitacion}
             </p>
             <button
               onClick={copiarCodigo}
@@ -245,7 +293,6 @@ function PantallaAmigos({ user, onVerAmigo }) {
             </button>
           </div>
 
-          {/* Botones de invitación */}
           <div className="flex flex-col sm:flex-row gap-2">
             <button
               onClick={compartirInvitacion}
@@ -279,7 +326,7 @@ function PantallaAmigos({ user, onVerAmigo }) {
         </div>
       </div>
 
-      {/* Agregar Amigo por Código */}
+      {/* Agregar amigo manualmente */}
       <div className="fwc-card p-6">
         <div className="flex items-center gap-3 mb-4">
           <UserPlus className="w-6 h-6 text-fwc-neon" />
@@ -318,8 +365,8 @@ function PantallaAmigos({ user, onVerAmigo }) {
           <div className="bg-fwc-bg border border-fwc-neon/30 rounded-lg p-4 flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               {resultadoBusqueda.photoURL ? (
-                <img 
-                  src={resultadoBusqueda.photoURL} 
+                <img
+                  src={resultadoBusqueda.photoURL}
                   alt={resultadoBusqueda.displayName}
                   className="w-12 h-12 rounded-full border-2 border-fwc-neon"
                 />
@@ -356,25 +403,31 @@ function PantallaAmigos({ user, onVerAmigo }) {
         )}
 
         {mensaje.texto && (
-          <div className={`rounded-lg p-3 text-sm flex items-center gap-2 ${
-            mensaje.tipo === 'exito' ? 'bg-green-500/10 border border-green-500/30 text-green-400' :
-            mensaje.tipo === 'error' ? 'bg-red-500/10 border border-red-500/30 text-fwc-accent' :
-            'bg-fwc-neon/10 border border-fwc-neon/30 text-fwc-neon'
-          }`}>
-            {mensaje.tipo === 'exito' ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+          <div
+            className={`rounded-lg p-3 text-sm flex items-center gap-2 ${
+              mensaje.tipo === 'exito'
+                ? 'bg-green-500/10 border border-green-500/30 text-green-400'
+                : mensaje.tipo === 'error'
+                ? 'bg-red-500/10 border border-red-500/30 text-fwc-accent'
+                : 'bg-fwc-neon/10 border border-fwc-neon/30 text-fwc-neon'
+            }`}
+          >
+            {mensaje.tipo === 'exito' ? (
+              <CheckCircle2 className="w-4 h-4" />
+            ) : (
+              <AlertCircle className="w-4 h-4" />
+            )}
             {mensaje.texto}
           </div>
         )}
       </div>
 
-      {/* Lista de Amigos */}
+      {/* Lista de amigos */}
       <div className="fwc-card p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <Users className="w-6 h-6 text-fwc-gold" />
-            <h3 className="font-display font-bold text-xl text-white">
-              Mis Amigos
-            </h3>
+            <h3 className="font-display font-bold text-xl text-white">Mis Amigos</h3>
           </div>
           <span className="bg-fwc-bg border border-fwc-border rounded-full px-3 py-1 text-fwc-gold text-sm font-display font-bold">
             {amigos.length}
@@ -386,8 +439,7 @@ function PantallaAmigos({ user, onVerAmigo }) {
             <Users className="w-12 h-12 text-gray-600 mx-auto mb-4" />
             <p className="text-gray-400 text-lg mb-2">Tu red está vacía</p>
             <p className="text-gray-600 text-sm">
-              Comparte tu código de invitación con tus amigos<br />
-              o agrega a alguien con su código.
+              Comparte tu link de invitación con tus amigos
             </p>
           </div>
         ) : (
@@ -399,8 +451,8 @@ function PantallaAmigos({ user, onVerAmigo }) {
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   {amigo.photoURL ? (
-                    <img 
-                      src={amigo.photoURL} 
+                    <img
+                      src={amigo.photoURL}
                       alt={amigo.displayName}
                       className="w-11 h-11 rounded-full border-2 border-fwc-gold/40"
                     />
