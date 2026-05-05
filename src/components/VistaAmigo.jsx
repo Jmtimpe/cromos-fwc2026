@@ -401,6 +401,8 @@ function VistaAmigo({ amigo, miInventario, onVolver, miUsuario }) {
                                       cromo={cromo}
                                       cantidadAmigo={inventarioAmigo[cromo.numero] || 0}
                                       cantidadMia={miInventario[cromo.numero] || 0}
+                                      onPedir={handlePedirCromo}
+                                      pidiendoEsteCromo={pedidoEnCurso === cromo.numero}
                                     />
                                   ))}
                                 </div>
@@ -593,7 +595,7 @@ function CromoMatch({ cromo, cantidad, tipo, onPedir, pidiendoEsteCromo }) {
   );
 }
 
-function CromoVistaAmigo({ cromo, cantidadAmigo, cantidadMia }) {
+function CromoVistaAmigo({ cromo, cantidadAmigo, cantidadMia, onPedir, pidiendoEsteCromo }) {
   const equipoInfo = getEquipoInfo(cromo.equipo);
   const elLoTiene = cantidadAmigo >= 1;
   const elLoTieneRepe = cantidadAmigo >= 2;
@@ -630,7 +632,7 @@ function CromoVistaAmigo({ cromo, cantidadAmigo, cantidadMia }) {
           {cromo.detalle}
         </p>
       )}
-      <div className="text-center pt-2 border-t border-fwc-border/50">
+      <div className="text-center pt-2 border-t border-fwc-border/50 mb-2">
         {!elLoTiene ? (
           <span className="text-gray-500 text-xs uppercase tracking-wider">
             No lo tiene
@@ -649,6 +651,24 @@ function CromoVistaAmigo({ cromo, cantidadAmigo, cantidadMia }) {
           </span>
         )}
       </div>
+
+      {/* Botón Pedir solo aparece si es match (él tiene repe Y yo no tengo) */}
+      {esMatch && onPedir && (
+        <button
+          onClick={() => onPedir(cromo)}
+          disabled={pidiendoEsteCromo}
+          className="w-full bg-fwc-gold hover:bg-yellow-500 text-fwc-bg font-display font-bold uppercase tracking-wider text-xs py-1.5 rounded transition-all flex items-center justify-center gap-1 disabled:opacity-50"
+        >
+          {pidiendoEsteCromo ? (
+            <Loading className="w-3 h-3 animate-spin" />
+          ) : (
+            <>
+              <ShoppingCart className="w-3 h-3" />
+              Pedir
+            </>
+          )}
+        </button>
+      )}
     </div>
   );
 }
