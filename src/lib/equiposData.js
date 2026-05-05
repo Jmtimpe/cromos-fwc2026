@@ -1,4 +1,5 @@
 // Mapeo de equipos del Mundial 2026: códigos ISO + nombre legible
+// Las claves están en formato del catálogo de cromos (MAYÚSCULAS sin acentos)
 export const EQUIPOS_INFO = {
   'MEXICO':           { iso: 'mx', nombre: 'México' },
   'SOUTH AFRICA':     { iso: 'za', nombre: 'Sudáfrica' },
@@ -53,10 +54,88 @@ export const EQUIPOS_INFO = {
   'COCA COLA':        { iso: 'CC', nombre: 'Coca-Cola Stars' },
 };
 
-// Helper: obtener info de un equipo (con fallback seguro)
+// ============================================================================
+// ALIAS de nombres de equipos (para sincronizar con partidosData.js)
+// Los partidos usan nombres con acentos. Esto los convierte al formato del catálogo.
+// ============================================================================
+const ALIAS_EQUIPOS = {
+  // Acentos / variaciones
+  'México': 'MEXICO',
+  'Sudáfrica': 'SOUTH AFRICA',
+  'República de Corea': 'KOREA',
+  'Corea del Sur': 'KOREA',
+  'República Checa': 'REP. CHECA',
+  'Rep. Checa': 'REP. CHECA',
+  'Canadá': 'CANADA',
+  'Bosnia y Herzegovina': 'BOSNIA-HERZEGOVINA',
+  'Bosnia-Herzegovina': 'BOSNIA-HERZEGOVINA',
+  'Catar': 'QATAR',
+  'Suiza': 'SUIZA',
+  'Brasil': 'BRASIL',
+  'Marruecos': 'MARRUECOS',
+  'Haití': 'HAITI',
+  'Escocia': 'ESCOCIA',
+  'Estados Unidos': 'USA',
+  'Paraguay': 'PARAGUAY',
+  'Australia': 'AUSTRALIA',
+  'Turquía': 'TUQUIA',
+  'Alemania': 'ALEMANIA',
+  'Curazao': 'CURACAO',
+  'Costa de Marfil': 'COSTA DE MARFIL',
+  'Ecuador': 'ECUADOR',
+  'Países Bajos': 'PAISES BAJOS',
+  'Japón': 'JAPON',
+  'Suecia': 'SUECIA',
+  'Túnez': 'TUNEZ',
+  'Bélgica': 'BELGICA',
+  'Egipto': 'EGIPTO',
+  'Irán': 'IRAN',
+  'Nueva Zelanda': 'NUEVA ZELANDA',
+  'España': 'ESPAÑA',
+  'Cabo Verde': 'CABO VERDE',
+  'Arabia Saudí': 'ARABIA SAUDITA',
+  'Arabia Saudita': 'ARABIA SAUDITA',
+  'Uruguay': 'URUGUAY',
+  'Francia': 'FRANCIA',
+  'Senegal': 'SENEGAL',
+  'Irak': 'IRAQ',
+  'Iraq': 'IRAQ',
+  'Noruega': 'NORUEGA',
+  'Argentina': 'ARGENTINA',
+  'Argelia': 'ARGELIA',
+  'Austria': 'AUSTRIA',
+  'Jordania': 'JORDANIA',
+  'Portugal': 'PORTUGAL',
+  'RD Congo': 'CONGO',
+  'Congo': 'CONGO',
+  'Uzbekistán': 'UZBEKISTAN',
+  'Colombia': 'COLOMBIA',
+  'Inglaterra': 'INGLATERRA',
+  'Croacia': 'CROACIA',
+  'Ghana': 'GHANA',
+  'Panamá': 'PANAMA',
+};
+
+// ============================================================================
+// Helper: obtener info de un equipo
+// Acepta AMBOS formatos:
+//   - "MEXICO" (formato del catálogo de cromos)
+//   - "México" (formato de partidosData.js con acentos)
+// ============================================================================
 export const getEquipoInfo = (equipo) => {
-  return EQUIPOS_INFO[equipo] || { 
-    iso: '?', 
-    nombre: equipo 
-  };
+  if (!equipo) return { iso: '?', nombre: 'Desconocido' };
+  
+  // 1. Intentar buscar directamente (formato del catálogo de cromos)
+  if (EQUIPOS_INFO[equipo]) {
+    return EQUIPOS_INFO[equipo];
+  }
+  
+  // 2. Intentar buscar usando el alias (formato con acentos de partidos)
+  const claveOficial = ALIAS_EQUIPOS[equipo];
+  if (claveOficial && EQUIPOS_INFO[claveOficial]) {
+    return EQUIPOS_INFO[claveOficial];
+  }
+  
+  // 3. Fallback: devolver el nombre tal cual con ISO desconocido
+  return { iso: '?', nombre: equipo };
 };
