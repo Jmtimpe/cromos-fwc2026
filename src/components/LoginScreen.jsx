@@ -9,14 +9,24 @@ function LoginScreen() {
   const handleLogin = async () => {
     setLoading(true);
     setError('');
-    
-    const { user, error } = await signInWithGoogle();
-    
-    if (error) {
-      setError('No se pudo iniciar sesión. Intenta de nuevo.');
-      setLoading(false);
+
+    const result = await signInWithGoogle();
+
+    // Si es exitoso pero con redirect, no hacemos nada
+    // (el navegador va a redirigir y al volver, App.jsx detectará el cambio)
+    if (result.redirect) {
+      return;
     }
-    // Si todo sale bien, el observador en App.jsx detectará el cambio
+
+    // Si fue exitoso con popup, App.jsx detectará el cambio de auth
+    if (result.success) {
+      // No reseteamos loading porque la app va a navegar
+      return;
+    }
+
+    // Si hubo error, mostrarlo
+    setError(result.error || 'No se pudo iniciar sesión. Intenta nuevamente.');
+    setLoading(false);
   };
 
   return (

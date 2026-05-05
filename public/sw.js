@@ -1,6 +1,6 @@
 // Service Worker para Cromos FWC2026
 // Versión: actualiza este número cuando hagas cambios importantes
-const CACHE_VERSION = 'cromos-fwc2026-v1';
+const CACHE_VERSION = 'cromos-fwc2026-v3';
 
 // Archivos críticos que se cachean al instalar
 const CACHE_INICIAL = [
