@@ -1,131 +1,390 @@
-// Calendario oficial Mundial 2026 - 104 partidos
-// Fechas y sedes confirmadas (sorteo del 5 de diciembre 2025)
-// Las horas están en hora local de la sede; se convierten a Ecuador (GMT-5) en runtime
+// ============================================================================
+// CALENDARIO COPA MUNDIAL FIFA 2026
+// Todos los horarios están en hora Ecuador (GMT-5 / America/Guayaquil)
+// 104 partidos totales: 72 de fase de grupos + 32 de fase eliminatoria
+// ============================================================================
 
-export const SEDES = {
-  AZTECA: { nombre: 'Estadio Azteca', ciudad: 'Ciudad de México', pais: 'MX', gmtOffset: -6 },
-  AKRON: { nombre: 'Estadio Akron', ciudad: 'Guadalajara', pais: 'MX', gmtOffset: -6 },
-  BBVA: { nombre: 'Estadio BBVA', ciudad: 'Monterrey', pais: 'MX', gmtOffset: -6 },
-  BMO: { nombre: 'BMO Field', ciudad: 'Toronto', pais: 'CA', gmtOffset: -4 },
-  BC: { nombre: 'BC Place', ciudad: 'Vancouver', pais: 'CA', gmtOffset: -7 },
-  METLIFE: { nombre: 'MetLife Stadium', ciudad: 'Nueva York / NJ', pais: 'US', gmtOffset: -4 },
-  SOFI: { nombre: 'SoFi Stadium', ciudad: 'Los Ángeles', pais: 'US', gmtOffset: -7 },
-  ATT: { nombre: 'AT&T Stadium', ciudad: 'Dallas', pais: 'US', gmtOffset: -5 },
-  NRG: { nombre: 'NRG Stadium', ciudad: 'Houston', pais: 'US', gmtOffset: -5 },
-  MERCEDES: { nombre: 'Mercedes-Benz Stadium', ciudad: 'Atlanta', pais: 'US', gmtOffset: -4 },
-  HARDROCK: { nombre: 'Hard Rock Stadium', ciudad: 'Miami', pais: 'US', gmtOffset: -4 },
-  GILLETTE: { nombre: 'Gillette Stadium', ciudad: 'Boston', pais: 'US', gmtOffset: -4 },
-  LINCOLN: { nombre: 'Lincoln Financial Field', ciudad: 'Filadelfia', pais: 'US', gmtOffset: -4 },
-  ARROWHEAD: { nombre: 'Arrowhead Stadium', ciudad: 'Kansas City', pais: 'US', gmtOffset: -5 },
-  LEVIS: { nombre: 'Levis Stadium', ciudad: 'San Francisco Bay', pais: 'US', gmtOffset: -7 },
-  LUMEN: { nombre: 'Lumen Field', ciudad: 'Seattle', pais: 'US', gmtOffset: -7 },
+// === CONSTANTES DE FASES ===
+export const FASES = {
+  GRUPO: 'GRUPO',
+  R32: 'R32',           // 16avos de final
+  R16: 'R16',           // Octavos de final
+  CUARTOS: 'CUARTOS',   // Cuartos de final
+  SEMI: 'SEMI',         // Semifinales
+  TERCERO: 'TERCERO',   // Tercer puesto
+  FINAL: 'FINAL',       // Final
 };
 
-export const PARTIDOS_FWC2026 = [
-  { numero: 1, fecha: '2026-06-11', horaLocal: '13:00', sede: 'AZTECA', fase: 'GRUPO', equipo1: 'MEXICO', equipo2: 'SOUTH AFRICA', grupo: 'A' },
-  { numero: 2, fecha: '2026-06-12', horaLocal: '15:00', sede: 'BMO', fase: 'GRUPO', equipo1: 'CANADA', equipo2: 'BOSNIA-HERZEGOVINA', grupo: 'B' },
-  { numero: 3, fecha: '2026-06-12', horaLocal: '18:00', sede: 'SOFI', fase: 'GRUPO', equipo1: 'USA', equipo2: 'PARAGUAY', grupo: 'D' },
-  { numero: 4, fecha: '2026-06-12', horaLocal: '21:00', sede: 'METLIFE', fase: 'GRUPO', equipo1: 'NORUEGA', equipo2: 'IRAQ', grupo: 'I' },
-  { numero: 5, fecha: '2026-06-13', horaLocal: '12:00', sede: 'METLIFE', fase: 'GRUPO', equipo1: 'BRASIL', equipo2: 'MARRUECOS', grupo: 'C' },
-  { numero: 6, fecha: '2026-06-13', horaLocal: '15:00', sede: 'NRG', fase: 'GRUPO', equipo1: 'AUSTRALIA', equipo2: 'TUQUIA', grupo: 'D' },
-  { numero: 7, fecha: '2026-06-13', horaLocal: '18:00', sede: 'GILLETTE', fase: 'GRUPO', equipo1: 'IRAN', equipo2: 'NUEVA ZELANDA', grupo: 'G' },
-  { numero: 8, fecha: '2026-06-13', horaLocal: '21:00', sede: 'BBVA', fase: 'GRUPO', equipo1: 'COSTA DE MARFIL', equipo2: 'CURACAO', grupo: 'E' },
-  { numero: 9, fecha: '2026-06-14', horaLocal: '12:00', sede: 'AKRON', fase: 'GRUPO', equipo1: 'KOREA', equipo2: 'REP. CHECA', grupo: 'A' },
-  { numero: 10, fecha: '2026-06-14', horaLocal: '15:00', sede: 'METLIFE', fase: 'GRUPO', equipo1: 'BELGICA', equipo2: 'EGIPTO', grupo: 'G' },
-  { numero: 11, fecha: '2026-06-14', horaLocal: '18:00', sede: 'LINCOLN', fase: 'GRUPO', equipo1: 'PAISES BAJOS', equipo2: 'JAPON', grupo: 'F' },
-  { numero: 12, fecha: '2026-06-14', horaLocal: '21:00', sede: 'AZTECA', fase: 'GRUPO', equipo1: 'ALEMANIA', equipo2: 'ECUADOR', grupo: 'E' },
-  { numero: 13, fecha: '2026-06-15', horaLocal: '12:00', sede: 'MERCEDES', fase: 'GRUPO', equipo1: 'ESPAÑA', equipo2: 'CABO VERDE', grupo: 'H' },
-  { numero: 14, fecha: '2026-06-15', horaLocal: '15:00', sede: 'BBVA', fase: 'GRUPO', equipo1: 'SUIZA', equipo2: 'QATAR', grupo: 'B' },
-  { numero: 15, fecha: '2026-06-15', horaLocal: '18:00', sede: 'BC', fase: 'GRUPO', equipo1: 'PORTUGAL', equipo2: 'CONGO', grupo: 'K' },
-  { numero: 16, fecha: '2026-06-15', horaLocal: '21:00', sede: 'LUMEN', fase: 'GRUPO', equipo1: 'SUECIA', equipo2: 'TUNEZ', grupo: 'F' },
-  { numero: 17, fecha: '2026-06-16', horaLocal: '12:00', sede: 'ATT', fase: 'GRUPO', equipo1: 'FRANCIA', equipo2: 'SENEGAL', grupo: 'I' },
-  { numero: 18, fecha: '2026-06-16', horaLocal: '15:00', sede: 'BMO', fase: 'GRUPO', equipo1: 'JORDANIA', equipo2: 'AUSTRIA', grupo: 'J' },
-  { numero: 19, fecha: '2026-06-16', horaLocal: '18:00', sede: 'HARDROCK', fase: 'GRUPO', equipo1: 'ARGENTINA', equipo2: 'ARGELIA', grupo: 'J' },
-  { numero: 20, fecha: '2026-06-16', horaLocal: '21:00', sede: 'SOFI', fase: 'GRUPO', equipo1: 'ARABIA SAUDITA', equipo2: 'URUGUAY', grupo: 'H' },
-  { numero: 21, fecha: '2026-06-17', horaLocal: '12:00', sede: 'ATT', fase: 'GRUPO', equipo1: 'INGLATERRA', equipo2: 'CROACIA', grupo: 'L' },
-  { numero: 22, fecha: '2026-06-17', horaLocal: '15:00', sede: 'METLIFE', fase: 'GRUPO', equipo1: 'GHANA', equipo2: 'PANAMA', grupo: 'L' },
-  { numero: 23, fecha: '2026-06-17', horaLocal: '18:00', sede: 'AKRON', fase: 'GRUPO', equipo1: 'COLOMBIA', equipo2: 'UZBEKISTAN', grupo: 'K' },
-  { numero: 24, fecha: '2026-06-17', horaLocal: '21:00', sede: 'NRG', fase: 'GRUPO', equipo1: 'HAITI', equipo2: 'ESCOCIA', grupo: 'C' },
-  { numero: 25, fecha: '2026-06-18', horaLocal: '12:00', sede: 'AZTECA', fase: 'GRUPO', equipo1: 'MEXICO', equipo2: 'KOREA', grupo: 'A' },
-  { numero: 26, fecha: '2026-06-18', horaLocal: '15:00', sede: 'GILLETTE', fase: 'GRUPO', equipo1: 'SOUTH AFRICA', equipo2: 'REP. CHECA', grupo: 'A' },
-  { numero: 27, fecha: '2026-06-18', horaLocal: '18:00', sede: 'LINCOLN', fase: 'GRUPO', equipo1: 'CANADA', equipo2: 'QATAR', grupo: 'B' },
-  { numero: 28, fecha: '2026-06-18', horaLocal: '21:00', sede: 'LUMEN', fase: 'GRUPO', equipo1: 'BOSNIA-HERZEGOVINA', equipo2: 'SUIZA', grupo: 'B' },
-  { numero: 29, fecha: '2026-06-19', horaLocal: '12:00', sede: 'HARDROCK', fase: 'GRUPO', equipo1: 'BRASIL', equipo2: 'HAITI', grupo: 'C' },
-  { numero: 30, fecha: '2026-06-19', horaLocal: '15:00', sede: 'ARROWHEAD', fase: 'GRUPO', equipo1: 'MARRUECOS', equipo2: 'ESCOCIA', grupo: 'C' },
-  { numero: 31, fecha: '2026-06-19', horaLocal: '18:00', sede: 'SOFI', fase: 'GRUPO', equipo1: 'USA', equipo2: 'AUSTRALIA', grupo: 'D' },
-  { numero: 32, fecha: '2026-06-19', horaLocal: '21:00', sede: 'NRG', fase: 'GRUPO', equipo1: 'PARAGUAY', equipo2: 'TUQUIA', grupo: 'D' },
-  { numero: 33, fecha: '2026-06-20', horaLocal: '12:00', sede: 'ATT', fase: 'GRUPO', equipo1: 'ALEMANIA', equipo2: 'CURACAO', grupo: 'E' },
-  { numero: 34, fecha: '2026-06-20', horaLocal: '15:00', sede: 'METLIFE', fase: 'GRUPO', equipo1: 'COSTA DE MARFIL', equipo2: 'ECUADOR', grupo: 'E' },
-  { numero: 35, fecha: '2026-06-20', horaLocal: '18:00', sede: 'GILLETTE', fase: 'GRUPO', equipo1: 'PAISES BAJOS', equipo2: 'SUECIA', grupo: 'F' },
-  { numero: 36, fecha: '2026-06-20', horaLocal: '22:00', sede: 'BBVA', fase: 'GRUPO', equipo1: 'TUNEZ', equipo2: 'JAPON', grupo: 'F' },
-  { numero: 37, fecha: '2026-06-21', horaLocal: '12:00', sede: 'MERCEDES', fase: 'GRUPO', equipo1: 'ESPAÑA', equipo2: 'ARABIA SAUDITA', grupo: 'H' },
-  { numero: 38, fecha: '2026-06-21', horaLocal: '15:00', sede: 'AKRON', fase: 'GRUPO', equipo1: 'CABO VERDE', equipo2: 'URUGUAY', grupo: 'H' },
-  { numero: 39, fecha: '2026-06-21', horaLocal: '18:00', sede: 'BC', fase: 'GRUPO', equipo1: 'BELGICA', equipo2: 'NUEVA ZELANDA', grupo: 'G' },
-  { numero: 40, fecha: '2026-06-21', horaLocal: '21:00', sede: 'LUMEN', fase: 'GRUPO', equipo1: 'EGIPTO', equipo2: 'IRAN', grupo: 'G' },
-  { numero: 41, fecha: '2026-06-22', horaLocal: '12:00', sede: 'LINCOLN', fase: 'GRUPO', equipo1: 'FRANCIA', equipo2: 'IRAQ', grupo: 'I' },
-  { numero: 42, fecha: '2026-06-22', horaLocal: '15:00', sede: 'METLIFE', fase: 'GRUPO', equipo1: 'SENEGAL', equipo2: 'NORUEGA', grupo: 'I' },
-  { numero: 43, fecha: '2026-06-22', horaLocal: '18:00', sede: 'HARDROCK', fase: 'GRUPO', equipo1: 'ARGENTINA', equipo2: 'AUSTRIA', grupo: 'J' },
-  { numero: 44, fecha: '2026-06-22', horaLocal: '21:00', sede: 'ATT', fase: 'GRUPO', equipo1: 'ARGELIA', equipo2: 'JORDANIA', grupo: 'J' },
-  { numero: 45, fecha: '2026-06-23', horaLocal: '12:00', sede: 'BMO', fase: 'GRUPO', equipo1: 'PORTUGAL', equipo2: 'UZBEKISTAN', grupo: 'K' },
-  { numero: 46, fecha: '2026-06-23', horaLocal: '15:00', sede: 'NRG', fase: 'GRUPO', equipo1: 'CONGO', equipo2: 'COLOMBIA', grupo: 'K' },
-  { numero: 47, fecha: '2026-06-23', horaLocal: '18:00', sede: 'AZTECA', fase: 'GRUPO', equipo1: 'INGLATERRA', equipo2: 'GHANA', grupo: 'L' },
-  { numero: 48, fecha: '2026-06-23', horaLocal: '21:00', sede: 'ARROWHEAD', fase: 'GRUPO', equipo1: 'CROACIA', equipo2: 'PANAMA', grupo: 'L' },
-  { numero: 49, fecha: '2026-06-24', horaLocal: '15:00', sede: 'BBVA', fase: 'GRUPO', equipo1: 'MEXICO', equipo2: 'REP. CHECA', grupo: 'A' },
-  { numero: 50, fecha: '2026-06-24', horaLocal: '15:00', sede: 'AKRON', fase: 'GRUPO', equipo1: 'SOUTH AFRICA', equipo2: 'KOREA', grupo: 'A' },
-  { numero: 51, fecha: '2026-06-24', horaLocal: '19:00', sede: 'GILLETTE', fase: 'GRUPO', equipo1: 'CANADA', equipo2: 'SUIZA', grupo: 'B' },
-  { numero: 52, fecha: '2026-06-24', horaLocal: '19:00', sede: 'LINCOLN', fase: 'GRUPO', equipo1: 'BOSNIA-HERZEGOVINA', equipo2: 'QATAR', grupo: 'B' },
-  { numero: 53, fecha: '2026-06-25', horaLocal: '13:00', sede: 'HARDROCK', fase: 'GRUPO', equipo1: 'BRASIL', equipo2: 'ESCOCIA', grupo: 'C' },
-  { numero: 54, fecha: '2026-06-25', horaLocal: '13:00', sede: 'NRG', fase: 'GRUPO', equipo1: 'MARRUECOS', equipo2: 'HAITI', grupo: 'C' },
-  { numero: 55, fecha: '2026-06-25', horaLocal: '17:00', sede: 'ATT', fase: 'GRUPO', equipo1: 'USA', equipo2: 'TUQUIA', grupo: 'D' },
-  { numero: 56, fecha: '2026-06-25', horaLocal: '17:00', sede: 'LUMEN', fase: 'GRUPO', equipo1: 'PARAGUAY', equipo2: 'AUSTRALIA', grupo: 'D' },
-  { numero: 57, fecha: '2026-06-26', horaLocal: '13:00', sede: 'AZTECA', fase: 'GRUPO', equipo1: 'ALEMANIA', equipo2: 'COSTA DE MARFIL', grupo: 'E' },
-  { numero: 58, fecha: '2026-06-26', horaLocal: '13:00', sede: 'BMO', fase: 'GRUPO', equipo1: 'ECUADOR', equipo2: 'CURACAO', grupo: 'E' },
-  { numero: 59, fecha: '2026-06-26', horaLocal: '17:00', sede: 'BC', fase: 'GRUPO', equipo1: 'PAISES BAJOS', equipo2: 'TUNEZ', grupo: 'F' },
-  { numero: 60, fecha: '2026-06-26', horaLocal: '17:00', sede: 'METLIFE', fase: 'GRUPO', equipo1: 'JAPON', equipo2: 'SUECIA', grupo: 'F' },
-  { numero: 61, fecha: '2026-06-26', horaLocal: '21:00', sede: 'BBVA', fase: 'GRUPO', equipo1: 'BELGICA', equipo2: 'IRAN', grupo: 'G' },
-  { numero: 62, fecha: '2026-06-26', horaLocal: '21:00', sede: 'AKRON', fase: 'GRUPO', equipo1: 'EGIPTO', equipo2: 'NUEVA ZELANDA', grupo: 'G' },
-  { numero: 63, fecha: '2026-06-27', horaLocal: '13:00', sede: 'MERCEDES', fase: 'GRUPO', equipo1: 'ESPAÑA', equipo2: 'URUGUAY', grupo: 'H' },
-  { numero: 64, fecha: '2026-06-27', horaLocal: '13:00', sede: 'HARDROCK', fase: 'GRUPO', equipo1: 'CABO VERDE', equipo2: 'ARABIA SAUDITA', grupo: 'H' },
-  { numero: 65, fecha: '2026-06-27', horaLocal: '17:00', sede: 'GILLETTE', fase: 'GRUPO', equipo1: 'FRANCIA', equipo2: 'NORUEGA', grupo: 'I' },
-  { numero: 66, fecha: '2026-06-27', horaLocal: '17:00', sede: 'ARROWHEAD', fase: 'GRUPO', equipo1: 'IRAQ', equipo2: 'SENEGAL', grupo: 'I' },
-  { numero: 67, fecha: '2026-06-27', horaLocal: '21:00', sede: 'NRG', fase: 'GRUPO', equipo1: 'ARGENTINA', equipo2: 'JORDANIA', grupo: 'J' },
-  { numero: 68, fecha: '2026-06-27', horaLocal: '21:00', sede: 'LINCOLN', fase: 'GRUPO', equipo1: 'AUSTRIA', equipo2: 'ARGELIA', grupo: 'J' },
-  { numero: 69, fecha: '2026-06-27', horaLocal: '13:00', sede: 'LUMEN', fase: 'GRUPO', equipo1: 'PORTUGAL', equipo2: 'COLOMBIA', grupo: 'K' },
-  { numero: 70, fecha: '2026-06-27', horaLocal: '13:00', sede: 'BC', fase: 'GRUPO', equipo1: 'UZBEKISTAN', equipo2: 'CONGO', grupo: 'K' },
-  { numero: 71, fecha: '2026-06-27', horaLocal: '17:00', sede: 'ATT', fase: 'GRUPO', equipo1: 'INGLATERRA', equipo2: 'PANAMA', grupo: 'L' },
-  { numero: 72, fecha: '2026-06-27', horaLocal: '17:00', sede: 'AZTECA', fase: 'GRUPO', equipo1: 'GHANA', equipo2: 'CROACIA', grupo: 'L' },
-  { numero: 73, fecha: '2026-06-28', horaLocal: '15:00', sede: 'SOFI', fase: 'R32', equipo1: '2A', equipo2: '2B', grupo: null },
-  { numero: 74, fecha: '2026-06-29', horaLocal: '16:30', sede: 'GILLETTE', fase: 'R32', equipo1: '1E', equipo2: '3ABCDF', grupo: null },
-  { numero: 75, fecha: '2026-06-29', horaLocal: '21:00', sede: 'BBVA', fase: 'R32', equipo1: '1F', equipo2: '2C', grupo: null },
-  { numero: 76, fecha: '2026-06-29', horaLocal: '13:00', sede: 'NRG', fase: 'R32', equipo1: '1C', equipo2: '2F', grupo: null },
-  { numero: 77, fecha: '2026-06-30', horaLocal: '17:00', sede: 'METLIFE', fase: 'R32', equipo1: '1I', equipo2: '3CDFGH', grupo: null },
-  { numero: 78, fecha: '2026-06-30', horaLocal: '13:00', sede: 'ATT', fase: 'R32', equipo1: '2E', equipo2: '2I', grupo: null },
-  { numero: 79, fecha: '2026-06-30', horaLocal: '21:00', sede: 'AZTECA', fase: 'R32', equipo1: '1A', equipo2: '3CEFHI', grupo: null },
-  { numero: 80, fecha: '2026-07-01', horaLocal: '12:00', sede: 'MERCEDES', fase: 'R32', equipo1: '1L', equipo2: '3EHIJK', grupo: null },
-  { numero: 81, fecha: '2026-07-01', horaLocal: '20:00', sede: 'LEVIS', fase: 'R32', equipo1: '1D', equipo2: '3BEFIJ', grupo: null },
-  { numero: 82, fecha: '2026-07-01', horaLocal: '16:00', sede: 'LUMEN', fase: 'R32', equipo1: '1G', equipo2: '3AEHIJ', grupo: null },
-  { numero: 83, fecha: '2026-07-02', horaLocal: '19:00', sede: 'BMO', fase: 'R32', equipo1: '2K', equipo2: '2L', grupo: null },
-  { numero: 84, fecha: '2026-07-02', horaLocal: '15:00', sede: 'SOFI', fase: 'R32', equipo1: '1H', equipo2: '2J', grupo: null },
-  { numero: 85, fecha: '2026-07-02', horaLocal: '23:00', sede: 'BC', fase: 'R32', equipo1: '1B', equipo2: '3EFGIJ', grupo: null },
-  { numero: 86, fecha: '2026-07-03', horaLocal: '18:00', sede: 'HARDROCK', fase: 'R32', equipo1: '1J', equipo2: '2H', grupo: null },
-  { numero: 87, fecha: '2026-07-03', horaLocal: '21:30', sede: 'ARROWHEAD', fase: 'R32', equipo1: '1K', equipo2: '3DEIJL', grupo: null },
-  { numero: 88, fecha: '2026-07-03', horaLocal: '14:00', sede: 'ATT', fase: 'R32', equipo1: '2D', equipo2: '2G', grupo: null },
-  { numero: 89, fecha: '2026-07-04', horaLocal: '17:00', sede: 'LINCOLN', fase: 'R16', equipo1: 'W74', equipo2: 'W77', grupo: null },
-  { numero: 90, fecha: '2026-07-04', horaLocal: '13:00', sede: 'NRG', fase: 'R16', equipo1: 'W73', equipo2: 'W75', grupo: null },
-  { numero: 91, fecha: '2026-07-05', horaLocal: '13:00', sede: 'AZTECA', fase: 'R16', equipo1: 'W79', equipo2: 'W81', grupo: null },
-  { numero: 92, fecha: '2026-07-05', horaLocal: '17:00', sede: 'MERCEDES', fase: 'R16', equipo1: 'W80', equipo2: 'W82', grupo: null },
-  { numero: 93, fecha: '2026-07-06', horaLocal: '15:00', sede: 'BC', fase: 'R16', equipo1: 'W76', equipo2: 'W78', grupo: null },
-  { numero: 94, fecha: '2026-07-06', horaLocal: '21:00', sede: 'METLIFE', fase: 'R16', equipo1: 'W83', equipo2: 'W84', grupo: null },
-  { numero: 95, fecha: '2026-07-07', horaLocal: '15:00', sede: 'HARDROCK', fase: 'R16', equipo1: 'W85', equipo2: 'W87', grupo: null },
-  { numero: 96, fecha: '2026-07-07', horaLocal: '21:00', sede: 'ATT', fase: 'R16', equipo1: 'W86', equipo2: 'W88', grupo: null },
-  { numero: 97, fecha: '2026-07-09', horaLocal: '21:00', sede: 'METLIFE', fase: 'CUARTOS', equipo1: 'W89', equipo2: 'W90', grupo: null },
-  { numero: 98, fecha: '2026-07-10', horaLocal: '21:00', sede: 'ATT', fase: 'CUARTOS', equipo1: 'W91', equipo2: 'W92', grupo: null },
-  { numero: 99, fecha: '2026-07-11', horaLocal: '17:00', sede: 'MERCEDES', fase: 'CUARTOS', equipo1: 'W93', equipo2: 'W94', grupo: null },
-  { numero: 100, fecha: '2026-07-11', horaLocal: '21:00', sede: 'SOFI', fase: 'CUARTOS', equipo1: 'W95', equipo2: 'W96', grupo: null },
-  { numero: 101, fecha: '2026-07-14', horaLocal: '15:00', sede: 'ATT', fase: 'SEMI', equipo1: 'W97', equipo2: 'W98', grupo: null },
-  { numero: 102, fecha: '2026-07-15', horaLocal: '15:00', sede: 'MERCEDES', fase: 'SEMI', equipo1: 'W99', equipo2: 'W100', grupo: null },
-  { numero: 103, fecha: '2026-07-18', horaLocal: '15:00', sede: 'HARDROCK', fase: 'TERCERO', equipo1: 'L101', equipo2: 'L102', grupo: null },
-  { numero: 104, fecha: '2026-07-19', horaLocal: '15:00', sede: 'METLIFE', fase: 'FINAL', equipo1: 'W101', equipo2: 'W102', grupo: null },
+// === SEDES OFICIALES (16 estadios) ===
+export const SEDES = {
+  AZTECA: {
+    id: 'AZTECA',
+    nombre: 'Estadio Azteca',
+    ciudad: 'Ciudad de México',
+    pais: 'México',
+    iso: 'mx',
+    gmtOffset: -6,
+  },
+  AKRON: {
+    id: 'AKRON',
+    nombre: 'Estadio Akron',
+    ciudad: 'Guadalajara',
+    pais: 'México',
+    iso: 'mx',
+    gmtOffset: -6,
+  },
+  BBVA: {
+    id: 'BBVA',
+    nombre: 'Estadio BBVA',
+    ciudad: 'Monterrey',
+    pais: 'México',
+    iso: 'mx',
+    gmtOffset: -6,
+  },
+  BMO: {
+    id: 'BMO',
+    nombre: 'BMO Field',
+    ciudad: 'Toronto',
+    pais: 'Canadá',
+    iso: 'ca',
+    gmtOffset: -4,
+  },
+  BC_PLACE: {
+    id: 'BC_PLACE',
+    nombre: 'BC Place',
+    ciudad: 'Vancouver',
+    pais: 'Canadá',
+    iso: 'ca',
+    gmtOffset: -7,
+  },
+  SOFI: {
+    id: 'SOFI',
+    nombre: 'SoFi Stadium',
+    ciudad: 'Inglewood',
+    pais: 'Estados Unidos',
+    iso: 'us',
+    gmtOffset: -7,
+  },
+  LEVIS: {
+    id: 'LEVIS',
+    nombre: 'Levi\'s Stadium',
+    ciudad: 'Santa Clara',
+    pais: 'Estados Unidos',
+    iso: 'us',
+    gmtOffset: -7,
+  },
+  LUMEN: {
+    id: 'LUMEN',
+    nombre: 'Lumen Field',
+    ciudad: 'Seattle',
+    pais: 'Estados Unidos',
+    iso: 'us',
+    gmtOffset: -7,
+  },
+  METLIFE: {
+    id: 'METLIFE',
+    nombre: 'MetLife Stadium',
+    ciudad: 'East Rutherford',
+    pais: 'Estados Unidos',
+    iso: 'us',
+    gmtOffset: -4,
+  },
+  LINCOLN: {
+    id: 'LINCOLN',
+    nombre: 'Lincoln Financial Field',
+    ciudad: 'Filadelfia',
+    pais: 'Estados Unidos',
+    iso: 'us',
+    gmtOffset: -4,
+  },
+  GILLETTE: {
+    id: 'GILLETTE',
+    nombre: 'Gillette Stadium',
+    ciudad: 'Foxborough',
+    pais: 'Estados Unidos',
+    iso: 'us',
+    gmtOffset: -4,
+  },
+  HARD_ROCK: {
+    id: 'HARD_ROCK',
+    nombre: 'Hard Rock Stadium',
+    ciudad: 'Miami Gardens',
+    pais: 'Estados Unidos',
+    iso: 'us',
+    gmtOffset: -4,
+  },
+  MERCEDES: {
+    id: 'MERCEDES',
+    nombre: 'Mercedes-Benz Stadium',
+    ciudad: 'Atlanta',
+    pais: 'Estados Unidos',
+    iso: 'us',
+    gmtOffset: -4,
+  },
+  ATT: {
+    id: 'ATT',
+    nombre: 'AT&T Stadium',
+    ciudad: 'Arlington',
+    pais: 'Estados Unidos',
+    iso: 'us',
+    gmtOffset: -5,
+  },
+  NRG: {
+    id: 'NRG',
+    nombre: 'NRG Stadium',
+    ciudad: 'Houston',
+    pais: 'Estados Unidos',
+    iso: 'us',
+    gmtOffset: -5,
+  },
+  ARROWHEAD: {
+    id: 'ARROWHEAD',
+    nombre: 'GEHA Field at Arrowhead',
+    ciudad: 'Kansas City',
+    pais: 'Estados Unidos',
+    iso: 'us',
+    gmtOffset: -5,
+  },
+};
+
+// === FASE DE GRUPOS (72 partidos) ===
+const partidosFaseGrupos = [
+  // === JORNADA 1 ===
+  // Jueves 11 jun 2026
+  { numero: 1, fase: FASES.GRUPO, grupo: 'A', fecha: '2026-06-11', hora: '14:00', sede: SEDES.AZTECA, equipoLocal: 'México', equipoVisitante: 'Sudáfrica' },
+  { numero: 2, fase: FASES.GRUPO, grupo: 'A', fecha: '2026-06-11', hora: '21:00', sede: SEDES.AKRON, equipoLocal: 'República de Corea', equipoVisitante: 'República Checa' },
+  
+  // Viernes 12 jun 2026
+  { numero: 3, fase: FASES.GRUPO, grupo: 'B', fecha: '2026-06-12', hora: '14:00', sede: SEDES.BMO, equipoLocal: 'Canadá', equipoVisitante: 'Bosnia y Herzegovina' },
+  { numero: 4, fase: FASES.GRUPO, grupo: 'D', fecha: '2026-06-12', hora: '20:00', sede: SEDES.SOFI, equipoLocal: 'Estados Unidos', equipoVisitante: 'Paraguay' },
+  
+  // Sábado 13 jun 2026
+  { numero: 5, fase: FASES.GRUPO, grupo: 'B', fecha: '2026-06-13', hora: '14:00', sede: SEDES.LEVIS, equipoLocal: 'Catar', equipoVisitante: 'Suiza' },
+  { numero: 6, fase: FASES.GRUPO, grupo: 'C', fecha: '2026-06-13', hora: '17:00', sede: SEDES.METLIFE, equipoLocal: 'Brasil', equipoVisitante: 'Marruecos' },
+  { numero: 7, fase: FASES.GRUPO, grupo: 'C', fecha: '2026-06-13', hora: '20:00', sede: SEDES.GILLETTE, equipoLocal: 'Haití', equipoVisitante: 'Escocia' },
+  { numero: 8, fase: FASES.GRUPO, grupo: 'D', fecha: '2026-06-13', hora: '23:00', sede: SEDES.BC_PLACE, equipoLocal: 'Australia', equipoVisitante: 'Turquía' },
+  
+  // Domingo 14 jun 2026
+  { numero: 9, fase: FASES.GRUPO, grupo: 'E', fecha: '2026-06-14', hora: '12:00', sede: SEDES.NRG, equipoLocal: 'Alemania', equipoVisitante: 'Curazao' },
+  { numero: 10, fase: FASES.GRUPO, grupo: 'F', fecha: '2026-06-14', hora: '15:00', sede: SEDES.ATT, equipoLocal: 'Países Bajos', equipoVisitante: 'Japón' },
+  { numero: 11, fase: FASES.GRUPO, grupo: 'E', fecha: '2026-06-14', hora: '18:00', sede: SEDES.LINCOLN, equipoLocal: 'Costa de Marfil', equipoVisitante: 'Ecuador' },
+  { numero: 12, fase: FASES.GRUPO, grupo: 'F', fecha: '2026-06-14', hora: '21:00', sede: SEDES.BBVA, equipoLocal: 'Suecia', equipoVisitante: 'Túnez' },
+  
+  // Lunes 15 jun 2026
+  { numero: 13, fase: FASES.GRUPO, grupo: 'H', fecha: '2026-06-15', hora: '11:00', sede: SEDES.MERCEDES, equipoLocal: 'España', equipoVisitante: 'Cabo Verde' },
+  { numero: 14, fase: FASES.GRUPO, grupo: 'G', fecha: '2026-06-15', hora: '14:00', sede: SEDES.LUMEN, equipoLocal: 'Bélgica', equipoVisitante: 'Egipto' },
+  { numero: 15, fase: FASES.GRUPO, grupo: 'H', fecha: '2026-06-15', hora: '17:00', sede: SEDES.HARD_ROCK, equipoLocal: 'Arabia Saudí', equipoVisitante: 'Uruguay' },
+  { numero: 16, fase: FASES.GRUPO, grupo: 'G', fecha: '2026-06-15', hora: '20:00', sede: SEDES.BC_PLACE, equipoLocal: 'Irán', equipoVisitante: 'Nueva Zelanda' },
+
+  // === JORNADA 2 ===
+  // Jueves 18 jun 2026
+  { numero: 17, fase: FASES.GRUPO, grupo: 'A', fecha: '2026-06-18', hora: '11:00', sede: SEDES.MERCEDES, equipoLocal: 'República Checa', equipoVisitante: 'Sudáfrica' },
+  { numero: 18, fase: FASES.GRUPO, grupo: 'B', fecha: '2026-06-18', hora: '14:00', sede: SEDES.SOFI, equipoLocal: 'Suiza', equipoVisitante: 'Bosnia y Herzegovina' },
+  { numero: 19, fase: FASES.GRUPO, grupo: 'B', fecha: '2026-06-18', hora: '17:00', sede: SEDES.BC_PLACE, equipoLocal: 'Canadá', equipoVisitante: 'Catar' },
+  { numero: 20, fase: FASES.GRUPO, grupo: 'A', fecha: '2026-06-18', hora: '20:00', sede: SEDES.AKRON, equipoLocal: 'México', equipoVisitante: 'República de Corea' },
+  
+  // Viernes 19 jun 2026
+  { numero: 21, fase: FASES.GRUPO, grupo: 'D', fecha: '2026-06-19', hora: '14:00', sede: SEDES.LUMEN, equipoLocal: 'Estados Unidos', equipoVisitante: 'Australia' },
+  { numero: 22, fase: FASES.GRUPO, grupo: 'C', fecha: '2026-06-19', hora: '17:00', sede: SEDES.GILLETTE, equipoLocal: 'Escocia', equipoVisitante: 'Marruecos' },
+  { numero: 23, fase: FASES.GRUPO, grupo: 'C', fecha: '2026-06-19', hora: '20:00', sede: SEDES.LINCOLN, equipoLocal: 'Brasil', equipoVisitante: 'Haití' },
+  { numero: 24, fase: FASES.GRUPO, grupo: 'D', fecha: '2026-06-19', hora: '23:00', sede: SEDES.LEVIS, equipoLocal: 'Turquía', equipoVisitante: 'Paraguay' },
+  
+  // Sábado 20 jun 2026
+  { numero: 25, fase: FASES.GRUPO, grupo: 'F', fecha: '2026-06-20', hora: '12:00', sede: SEDES.NRG, equipoLocal: 'Países Bajos', equipoVisitante: 'Suecia' },
+  { numero: 26, fase: FASES.GRUPO, grupo: 'E', fecha: '2026-06-20', hora: '15:00', sede: SEDES.BMO, equipoLocal: 'Alemania', equipoVisitante: 'Costa de Marfil' },
+  { numero: 27, fase: FASES.GRUPO, grupo: 'E', fecha: '2026-06-20', hora: '21:00', sede: SEDES.ARROWHEAD, equipoLocal: 'Ecuador', equipoVisitante: 'Curazao' },
+  { numero: 28, fase: FASES.GRUPO, grupo: 'F', fecha: '2026-06-20', hora: '23:00', sede: SEDES.BBVA, equipoLocal: 'Túnez', equipoVisitante: 'Japón' },
+  
+  // Domingo 21 jun 2026
+  { numero: 29, fase: FASES.GRUPO, grupo: 'H', fecha: '2026-06-21', hora: '11:00', sede: SEDES.MERCEDES, equipoLocal: 'España', equipoVisitante: 'Arabia Saudí' },
+  { numero: 30, fase: FASES.GRUPO, grupo: 'G', fecha: '2026-06-21', hora: '14:00', sede: SEDES.SOFI, equipoLocal: 'Bélgica', equipoVisitante: 'Irán' },
+  { numero: 31, fase: FASES.GRUPO, grupo: 'H', fecha: '2026-06-21', hora: '17:00', sede: SEDES.HARD_ROCK, equipoLocal: 'Uruguay', equipoVisitante: 'Cabo Verde' },
+  { numero: 32, fase: FASES.GRUPO, grupo: 'G', fecha: '2026-06-21', hora: '20:00', sede: SEDES.BC_PLACE, equipoLocal: 'Nueva Zelanda', equipoVisitante: 'Egipto' },
+  
+  // Lunes 22 jun 2026
+  { numero: 33, fase: FASES.GRUPO, grupo: 'J', fecha: '2026-06-22', hora: '12:00', sede: SEDES.ATT, equipoLocal: 'Argentina', equipoVisitante: 'Austria' },
+  { numero: 34, fase: FASES.GRUPO, grupo: 'I', fecha: '2026-06-22', hora: '16:00', sede: SEDES.LINCOLN, equipoLocal: 'Francia', equipoVisitante: 'Irak' },
+  { numero: 35, fase: FASES.GRUPO, grupo: 'I', fecha: '2026-06-22', hora: '19:00', sede: SEDES.METLIFE, equipoLocal: 'Noruega', equipoVisitante: 'Senegal' },
+  { numero: 36, fase: FASES.GRUPO, grupo: 'J', fecha: '2026-06-22', hora: '22:00', sede: SEDES.LEVIS, equipoLocal: 'Jordania', equipoVisitante: 'Argelia' },
+  
+  // Martes 23 jun 2026
+  { numero: 37, fase: FASES.GRUPO, grupo: 'K', fecha: '2026-06-23', hora: '12:00', sede: SEDES.NRG, equipoLocal: 'Portugal', equipoVisitante: 'Uzbekistán' },
+  { numero: 38, fase: FASES.GRUPO, grupo: 'L', fecha: '2026-06-23', hora: '15:00', sede: SEDES.GILLETTE, equipoLocal: 'Inglaterra', equipoVisitante: 'Ghana' },
+  { numero: 39, fase: FASES.GRUPO, grupo: 'L', fecha: '2026-06-23', hora: '18:00', sede: SEDES.BMO, equipoLocal: 'Panamá', equipoVisitante: 'Croacia' },
+  { numero: 40, fase: FASES.GRUPO, grupo: 'K', fecha: '2026-06-23', hora: '21:00', sede: SEDES.AKRON, equipoLocal: 'Colombia', equipoVisitante: 'RD Congo' },
+
+  // === JORNADA 3 ===
+  // Miércoles 24 jun 2026
+  { numero: 41, fase: FASES.GRUPO, grupo: 'B', fecha: '2026-06-24', hora: '14:00', sede: SEDES.BC_PLACE, equipoLocal: 'Suiza', equipoVisitante: 'Canadá' },
+  { numero: 42, fase: FASES.GRUPO, grupo: 'B', fecha: '2026-06-24', hora: '14:00', sede: SEDES.LUMEN, equipoLocal: 'Bosnia y Herzegovina', equipoVisitante: 'Catar' },
+  { numero: 43, fase: FASES.GRUPO, grupo: 'C', fecha: '2026-06-24', hora: '17:00', sede: SEDES.HARD_ROCK, equipoLocal: 'Escocia', equipoVisitante: 'Brasil' },
+  { numero: 44, fase: FASES.GRUPO, grupo: 'C', fecha: '2026-06-24', hora: '17:00', sede: SEDES.MERCEDES, equipoLocal: 'Marruecos', equipoVisitante: 'Haití' },
+  { numero: 45, fase: FASES.GRUPO, grupo: 'A', fecha: '2026-06-24', hora: '20:00', sede: SEDES.AZTECA, equipoLocal: 'República Checa', equipoVisitante: 'México' },
+  { numero: 46, fase: FASES.GRUPO, grupo: 'A', fecha: '2026-06-24', hora: '20:00', sede: SEDES.BBVA, equipoLocal: 'Sudáfrica', equipoVisitante: 'República de Corea' },
+  
+  // Jueves 25 jun 2026
+  { numero: 47, fase: FASES.GRUPO, grupo: 'E', fecha: '2026-06-25', hora: '15:00', sede: SEDES.LINCOLN, equipoLocal: 'Curazao', equipoVisitante: 'Costa de Marfil' },
+  { numero: 48, fase: FASES.GRUPO, grupo: 'E', fecha: '2026-06-25', hora: '15:00', sede: SEDES.METLIFE, equipoLocal: 'Ecuador', equipoVisitante: 'Alemania' },
+  { numero: 49, fase: FASES.GRUPO, grupo: 'F', fecha: '2026-06-25', hora: '18:00', sede: SEDES.ATT, equipoLocal: 'Japón', equipoVisitante: 'Suecia' },
+  { numero: 50, fase: FASES.GRUPO, grupo: 'F', fecha: '2026-06-25', hora: '18:00', sede: SEDES.ARROWHEAD, equipoLocal: 'Túnez', equipoVisitante: 'Países Bajos' },
+  { numero: 51, fase: FASES.GRUPO, grupo: 'D', fecha: '2026-06-25', hora: '21:00', sede: SEDES.SOFI, equipoLocal: 'Turquía', equipoVisitante: 'Estados Unidos' },
+  { numero: 52, fase: FASES.GRUPO, grupo: 'D', fecha: '2026-06-25', hora: '21:00', sede: SEDES.LEVIS, equipoLocal: 'Paraguay', equipoVisitante: 'Australia' },
+  
+  // Viernes 26 jun 2026
+  { numero: 53, fase: FASES.GRUPO, grupo: 'I', fecha: '2026-06-26', hora: '14:00', sede: SEDES.GILLETTE, equipoLocal: 'Noruega', equipoVisitante: 'Francia' },
+  { numero: 54, fase: FASES.GRUPO, grupo: 'I', fecha: '2026-06-26', hora: '14:00', sede: SEDES.BMO, equipoLocal: 'Senegal', equipoVisitante: 'Irak' },
+  { numero: 55, fase: FASES.GRUPO, grupo: 'H', fecha: '2026-06-26', hora: '19:00', sede: SEDES.NRG, equipoLocal: 'Cabo Verde', equipoVisitante: 'Arabia Saudí' },
+  { numero: 56, fase: FASES.GRUPO, grupo: 'H', fecha: '2026-06-26', hora: '19:00', sede: SEDES.AKRON, equipoLocal: 'Uruguay', equipoVisitante: 'España' },
+  { numero: 57, fase: FASES.GRUPO, grupo: 'G', fecha: '2026-06-26', hora: '22:00', sede: SEDES.LUMEN, equipoLocal: 'Egipto', equipoVisitante: 'Irán' },
+  { numero: 58, fase: FASES.GRUPO, grupo: 'G', fecha: '2026-06-26', hora: '22:00', sede: SEDES.BC_PLACE, equipoLocal: 'Nueva Zelanda', equipoVisitante: 'Bélgica' },
+  
+  // Sábado 27 jun 2026
+  { numero: 59, fase: FASES.GRUPO, grupo: 'L', fecha: '2026-06-27', hora: '16:00', sede: SEDES.METLIFE, equipoLocal: 'Panamá', equipoVisitante: 'Inglaterra' },
+  { numero: 60, fase: FASES.GRUPO, grupo: 'L', fecha: '2026-06-27', hora: '16:00', sede: SEDES.LINCOLN, equipoLocal: 'Croacia', equipoVisitante: 'Ghana' },
+  { numero: 61, fase: FASES.GRUPO, grupo: 'K', fecha: '2026-06-27', hora: '18:30', sede: SEDES.HARD_ROCK, equipoLocal: 'Colombia', equipoVisitante: 'Portugal' },
+  { numero: 62, fase: FASES.GRUPO, grupo: 'K', fecha: '2026-06-27', hora: '18:30', sede: SEDES.MERCEDES, equipoLocal: 'RD Congo', equipoVisitante: 'Uzbekistán' },
+  { numero: 63, fase: FASES.GRUPO, grupo: 'J', fecha: '2026-06-27', hora: '21:00', sede: SEDES.ARROWHEAD, equipoLocal: 'Argelia', equipoVisitante: 'Austria' },
+  { numero: 64, fase: FASES.GRUPO, grupo: 'J', fecha: '2026-06-27', hora: '21:00', sede: SEDES.ATT, equipoLocal: 'Jordania', equipoVisitante: 'Argentina' },
 ];
 
-export const TOTAL_PARTIDOS = 104;
+// ===========================================================================
+// FASE ELIMINATORIA (32 partidos)
+// Los equipos son PLACEHOLDERS que se resolverán en Fase 2 (auto-resolución)
+// ===========================================================================
+// Formato de placeholder:
+//   { tipo: 'posicion', valor: '1A' }  → 1ro Grupo A
+//   { tipo: 'posicion', valor: '2B' }  → 2do Grupo B
+//   { tipo: 'mejor3', valor: 'ABCDF' } → Mejor 3ro de A/B/C/D/F
+//   { tipo: 'ganador', valor: 73 }     → Ganador del partido 73
+//   { tipo: 'perdedor', valor: 101 }   → Perdedor del partido 101 (3er puesto)
+// ===========================================================================
+
+const partidosFaseEliminatoria = [
+  // === 16AVOS DE FINAL ===
+  // Domingo 28 jun 2026
+  { numero: 73, fase: FASES.R32, fecha: '2026-06-28', hora: '14:00', sede: SEDES.SOFI, equipoLocal: { tipo: 'posicion', valor: '2A' }, equipoVisitante: { tipo: 'posicion', valor: '2B' } },
+  
+  // Lunes 29 jun 2026
+  { numero: 74, fase: FASES.R32, fecha: '2026-06-29', hora: '15:30', sede: SEDES.GILLETTE, equipoLocal: { tipo: 'posicion', valor: '1E' }, equipoVisitante: { tipo: 'mejor3', valor: 'ABCDF' } },
+  { numero: 75, fase: FASES.R32, fecha: '2026-06-29', hora: '20:00', sede: SEDES.BBVA, equipoLocal: { tipo: 'posicion', valor: '1F' }, equipoVisitante: { tipo: 'posicion', valor: '2C' } },
+  { numero: 76, fase: FASES.R32, fecha: '2026-06-29', hora: '12:00', sede: SEDES.NRG, equipoLocal: { tipo: 'posicion', valor: '1C' }, equipoVisitante: { tipo: 'posicion', valor: '2F' } },
+  
+  // Martes 30 jun 2026
+  { numero: 77, fase: FASES.R32, fecha: '2026-06-30', hora: '16:00', sede: SEDES.METLIFE, equipoLocal: { tipo: 'posicion', valor: '1I' }, equipoVisitante: { tipo: 'mejor3', valor: 'CDFGH' } },
+  { numero: 78, fase: FASES.R32, fecha: '2026-06-30', hora: '12:00', sede: SEDES.ATT, equipoLocal: { tipo: 'posicion', valor: '2E' }, equipoVisitante: { tipo: 'posicion', valor: '2I' } },
+  { numero: 79, fase: FASES.R32, fecha: '2026-06-30', hora: '20:00', sede: SEDES.AZTECA, equipoLocal: { tipo: 'posicion', valor: '1A' }, equipoVisitante: { tipo: 'mejor3', valor: 'CEFHI' } },
+  
+  // Miércoles 1 jul 2026
+  { numero: 80, fase: FASES.R32, fecha: '2026-07-01', hora: '11:00', sede: SEDES.MERCEDES, equipoLocal: { tipo: 'posicion', valor: '1L' }, equipoVisitante: { tipo: 'mejor3', valor: 'EHIJK' } },
+  { numero: 81, fase: FASES.R32, fecha: '2026-07-01', hora: '19:00', sede: SEDES.LEVIS, equipoLocal: { tipo: 'posicion', valor: '1D' }, equipoVisitante: { tipo: 'mejor3', valor: 'BEFIJ' } },
+  { numero: 82, fase: FASES.R32, fecha: '2026-07-01', hora: '15:00', sede: SEDES.LUMEN, equipoLocal: { tipo: 'posicion', valor: '1G' }, equipoVisitante: { tipo: 'mejor3', valor: 'AEHIJ' } },
+  
+  // Jueves 2 jul 2026
+  { numero: 83, fase: FASES.R32, fecha: '2026-07-02', hora: '18:00', sede: SEDES.BMO, equipoLocal: { tipo: 'posicion', valor: '2K' }, equipoVisitante: { tipo: 'posicion', valor: '2L' } },
+  { numero: 84, fase: FASES.R32, fecha: '2026-07-02', hora: '14:00', sede: SEDES.SOFI, equipoLocal: { tipo: 'posicion', valor: '1H' }, equipoVisitante: { tipo: 'posicion', valor: '2J' } },
+  { numero: 85, fase: FASES.R32, fecha: '2026-07-02', hora: '22:00', sede: SEDES.BC_PLACE, equipoLocal: { tipo: 'posicion', valor: '1B' }, equipoVisitante: { tipo: 'mejor3', valor: 'EFGIJ' } },
+  
+  // Viernes 3 jul 2026
+  { numero: 86, fase: FASES.R32, fecha: '2026-07-03', hora: '17:00', sede: SEDES.HARD_ROCK, equipoLocal: { tipo: 'posicion', valor: '1J' }, equipoVisitante: { tipo: 'posicion', valor: '2H' } },
+  { numero: 87, fase: FASES.R32, fecha: '2026-07-03', hora: '20:30', sede: SEDES.ARROWHEAD, equipoLocal: { tipo: 'posicion', valor: '1K' }, equipoVisitante: { tipo: 'mejor3', valor: 'DEIJL' } },
+  { numero: 88, fase: FASES.R32, fecha: '2026-07-03', hora: '13:00', sede: SEDES.ATT, equipoLocal: { tipo: 'posicion', valor: '2D' }, equipoVisitante: { tipo: 'posicion', valor: '2G' } },
+
+  // === OCTAVOS DE FINAL ===
+  // Sábado 4 jul 2026
+  { numero: 89, fase: FASES.R16, fecha: '2026-07-04', hora: '16:00', sede: SEDES.LINCOLN, equipoLocal: { tipo: 'ganador', valor: 74 }, equipoVisitante: { tipo: 'ganador', valor: 77 } },
+  { numero: 90, fase: FASES.R16, fecha: '2026-07-04', hora: '12:00', sede: SEDES.NRG, equipoLocal: { tipo: 'ganador', valor: 73 }, equipoVisitante: { tipo: 'ganador', valor: 75 } },
+  
+  // Domingo 5 jul 2026
+  { numero: 91, fase: FASES.R16, fecha: '2026-07-05', hora: '15:00', sede: SEDES.METLIFE, equipoLocal: { tipo: 'ganador', valor: 76 }, equipoVisitante: { tipo: 'ganador', valor: 78 } },
+  { numero: 92, fase: FASES.R16, fecha: '2026-07-05', hora: '19:00', sede: SEDES.AZTECA, equipoLocal: { tipo: 'ganador', valor: 79 }, equipoVisitante: { tipo: 'ganador', valor: 80 } },
+  
+  // Lunes 6 jul 2026
+  { numero: 93, fase: FASES.R16, fecha: '2026-07-06', hora: '14:00', sede: SEDES.ATT, equipoLocal: { tipo: 'ganador', valor: 83 }, equipoVisitante: { tipo: 'ganador', valor: 84 } },
+  { numero: 94, fase: FASES.R16, fecha: '2026-07-06', hora: '19:00', sede: SEDES.LUMEN, equipoLocal: { tipo: 'ganador', valor: 81 }, equipoVisitante: { tipo: 'ganador', valor: 82 } },
+  
+  // Martes 7 jul 2026
+  { numero: 95, fase: FASES.R16, fecha: '2026-07-07', hora: '11:00', sede: SEDES.MERCEDES, equipoLocal: { tipo: 'ganador', valor: 86 }, equipoVisitante: { tipo: 'ganador', valor: 88 } },
+  { numero: 96, fase: FASES.R16, fecha: '2026-07-07', hora: '15:00', sede: SEDES.BC_PLACE, equipoLocal: { tipo: 'ganador', valor: 85 }, equipoVisitante: { tipo: 'ganador', valor: 87 } },
+
+  // === CUARTOS DE FINAL ===
+  // Jueves 9 jul 2026
+  { numero: 97, fase: FASES.CUARTOS, fecha: '2026-07-09', hora: '15:00', sede: SEDES.GILLETTE, equipoLocal: { tipo: 'ganador', valor: 89 }, equipoVisitante: { tipo: 'ganador', valor: 90 } },
+  
+  // Viernes 10 jul 2026
+  { numero: 98, fase: FASES.CUARTOS, fecha: '2026-07-10', hora: '14:00', sede: SEDES.SOFI, equipoLocal: { tipo: 'ganador', valor: 93 }, equipoVisitante: { tipo: 'ganador', valor: 94 } },
+  
+  // Sábado 11 jul 2026
+  { numero: 99, fase: FASES.CUARTOS, fecha: '2026-07-11', hora: '16:00', sede: SEDES.HARD_ROCK, equipoLocal: { tipo: 'ganador', valor: 91 }, equipoVisitante: { tipo: 'ganador', valor: 92 } },
+  { numero: 100, fase: FASES.CUARTOS, fecha: '2026-07-11', hora: '20:00', sede: SEDES.ARROWHEAD, equipoLocal: { tipo: 'ganador', valor: 95 }, equipoVisitante: { tipo: 'ganador', valor: 96 } },
+
+  // === SEMIFINALES ===
+  // Martes 14 jul 2026
+  { numero: 101, fase: FASES.SEMI, fecha: '2026-07-14', hora: '14:00', sede: SEDES.ATT, equipoLocal: { tipo: 'ganador', valor: 97 }, equipoVisitante: { tipo: 'ganador', valor: 98 } },
+  
+  // Miércoles 15 jul 2026
+  { numero: 102, fase: FASES.SEMI, fecha: '2026-07-15', hora: '14:00', sede: SEDES.MERCEDES, equipoLocal: { tipo: 'ganador', valor: 99 }, equipoVisitante: { tipo: 'ganador', valor: 100 } },
+
+  // === TERCER PUESTO ===
+  // Sábado 18 jul 2026
+  { numero: 103, fase: FASES.TERCERO, fecha: '2026-07-18', hora: '16:00', sede: SEDES.HARD_ROCK, equipoLocal: { tipo: 'perdedor', valor: 101 }, equipoVisitante: { tipo: 'perdedor', valor: 102 } },
+
+  // === FINAL ===
+  // Domingo 19 jul 2026
+  { numero: 104, fase: FASES.FINAL, fecha: '2026-07-19', hora: '14:00', sede: SEDES.METLIFE, equipoLocal: { tipo: 'ganador', valor: 101 }, equipoVisitante: { tipo: 'ganador', valor: 102 } },
+];
+
+// === EXPORT FINAL: TODOS LOS PARTIDOS UNIDOS ===
+export const partidosData = [...partidosFaseGrupos, ...partidosFaseEliminatoria];
+
+// ============================================================================
+// HELPER: Obtener nombre legible de un equipo (string o placeholder)
+// ============================================================================
+export function obtenerNombreEquipo(equipo) {
+  // Si es string, devolver tal cual
+  if (typeof equipo === 'string') return equipo;
+  
+  // Si es placeholder, formatearlo
+  if (equipo && equipo.tipo) {
+    if (equipo.tipo === 'posicion') {
+      const numero = equipo.valor.charAt(0);
+      const grupo = equipo.valor.charAt(1);
+      const ordinal = numero === '1' ? '1ro' : numero === '2' ? '2do' : '3ro';
+      return `${ordinal} Grupo ${grupo}`;
+    }
+    if (equipo.tipo === 'mejor3') {
+      const grupos = equipo.valor.split('').join('/');
+      return `Mejor 3ro de ${grupos}`;
+    }
+    if (equipo.tipo === 'ganador') {
+      return `Ganador del partido ${equipo.valor}`;
+    }
+    if (equipo.tipo === 'perdedor') {
+      return `Perdedor del partido ${equipo.valor}`;
+    }
+  }
+  
+  return 'Por definir';
+}
+
+// ============================================================================
+// HELPER: Verificar si un equipo es un placeholder (no resuelto aún)
+// ============================================================================
+export function esPlaceholder(equipo) {
+  return equipo && typeof equipo === 'object' && equipo.tipo;
+}
+
+// ============================================================================
+// HELPER: Texto descriptivo de la fase
+// ============================================================================
+export function nombreFase(fase) {
+  const nombres = {
+    [FASES.GRUPO]: 'Fase de Grupos',
+    [FASES.R32]: '16avos de Final',
+    [FASES.R16]: 'Octavos de Final',
+    [FASES.CUARTOS]: 'Cuartos de Final',
+    [FASES.SEMI]: 'Semifinales',
+    [FASES.TERCERO]: 'Tercer Puesto',
+    [FASES.FINAL]: 'Final',
+  };
+  return nombres[fase] || fase;
+}

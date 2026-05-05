@@ -1,157 +1,180 @@
 import React from 'react';
-import { Trophy, MapPin, Tv, Star, Clock } from 'lucide-react';
+import { Heart, Tv, Clock, MapPin, Star, Trophy } from 'lucide-react';
+import { 
+  obtenerNombreEquipo, 
+  esPlaceholder, 
+  nombreFase,
+  FASES 
+} from '../lib/partidosData';
 import { getEquipoInfo } from '../lib/equiposData';
-import { SEDES } from '../lib/partidosData';
-import { horaEcuador, cuentaRegresiva } from '../lib/fechasHelper';
 import Bandera from './Bandera';
 
-// Mapeo legible para fases
-const FASES_NOMBRE = {
-  GRUPO: 'Fase de Grupos',
-  R32: '16avos de Final',
-  R16: 'Octavos de Final',
-  CUARTOS: 'Cuartos de Final',
-  SEMI: 'Semifinal',
-  TERCERO: '3er Puesto',
-  FINAL: 'FINAL'
-};
+function TarjetaPartido({ 
+  partido, 
+  esFavorito, 
+  onToggleFavorito, 
+  canal,
+  enVivo = false,
+  proximo = false 
+}) {
+  const equipoLocalNombre = obtenerNombreEquipo(partido.equipoLocal);
+  const equipoVisitanteNombre = obtenerNombreEquipo(partido.equipoVisitante);
+  
+  const localEsPlaceholder = esPlaceholder(partido.equipoLocal);
+  const visitanteEsPlaceholder = esPlaceholder(partido.equipoVisitante);
+  
+  // Solo obtenemos info del equipo si NO es placeholder (tiene un nombre real)
+  const equipoLocalInfo = !localEsPlaceholder ? getEquipoInfo(equipoLocalNombre) : null;
+  const equipoVisitanteInfo = !visitanteEsPlaceholder ? getEquipoInfo(equipoVisitanteNombre) : null;
 
-const FASES_COLOR = {
-  GRUPO: 'text-gray-400',
-  R32: 'text-fwc-neon',
-  R16: 'text-fwc-neon',
-  CUARTOS: 'text-fwc-gold',
-  SEMI: 'text-fwc-gold',
-  TERCERO: 'text-fwc-accent',
-  FINAL: 'text-fwc-gold',
-};
+  // Detectar si Ecuador juega
+  const ecuadorJuega = equipoLocalNombre === 'Ecuador' || equipoVisitanteNombre === 'Ecuador';
+  
+  // Es la final?
+  const esFinal = partido.fase === FASES.FINAL;
+  const esSemi = partido.fase === FASES.SEMI;
+  const esEliminatoria = partido.fase !== FASES.GRUPO;
+  
+  // Color del badge según fase
+  const colorFase = {
+    [FASES.GRUPO]: 'bg-fwc-card text-gray-400 border-fwc-border',
+    [FASES.R32]: 'bg-fwc-neon/10 text-fwc-neon border-fwc-neon/40',
+    [FASES.R16]: 'bg-fwc-neon/15 text-fwc-neon border-fwc-neon/40',
+    [FASES.CUARTOS]: 'bg-fwc-gold/15 text-fwc-gold border-fwc-gold/40',
+    [FASES.SEMI]: 'bg-fwc-gold/20 text-fwc-gold border-fwc-gold/50',
+    [FASES.TERCERO]: 'bg-fwc-accent/15 text-fwc-accent border-fwc-accent/40',
+    [FASES.FINAL]: 'bg-gradient-to-r from-fwc-gold/30 to-fwc-accent/20 text-fwc-gold border-fwc-gold',
+  };
 
-function TarjetaPartido({ partido, esFavorito, onToggleFavorito, canal, mostrarFase = false }) {
-  const sede = SEDES[partido.sede];
-  const eq1Info = getEquipoInfo(partido.equipo1);
-  const eq2Info = getEquipoInfo(partido.equipo2);
-  const horaEc = horaEcuador(partido.fecha, partido.horaLocal, partido.sede);
-  const cuenta = cuentaRegresiva(partido.fecha, partido.horaLocal, partido.sede);
-  
-  // Si los equipos son códigos (W74, 1A, etc.) significa que aún no se conoce
-  const eq1Conocido = !partido.equipo1.match(/^[WL]?\d|^\d[A-Z]/);
-  const eq2Conocido = !partido.equipo2.match(/^[WL]?\d|^\d[A-Z]/);
-  
-  const esFinal = partido.fase === 'FINAL';
-  const enVivo = cuenta?.enVivo;
-  
+  // Formatear fecha en español
+  const fechaFormateada = new Date(`${partido.fecha}T12:00:00`).toLocaleDateString('es-EC', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'America/Guayaquil'
+  });
+
   return (
-    <div className={`fwc-card p-4 transition-all hover:border-fwc-gold/40 ${
-      esFinal ? 'border-fwc-gold border-2 bg-gradient-to-br from-fwc-gold/10 to-fwc-accent/5' : ''
-    } ${enVivo ? 'border-fwc-accent border-2 animate-pulse-slow' : ''}`}>
+    <div className={`fwc-card p-4 transition-all hover:border-fwc-gold/50 relative ${
+      esFinal ? 'border-fwc-gold shadow-lg shadow-fwc-gold/20' :
+      ecuadorJuega ? 'border-fwc-gold/40' :
+      'border-fwc-border'
+    }`}>
       
-      {/* Header: Fase + Hora + Favorito */}
-      <div className="flex items-center justify-between mb-3 pb-3 border-b border-fwc-border gap-2">
-        <div className="flex items-center gap-1.5 sm:gap-2 flex-1 min-w-0 flex-wrap">
-          {mostrarFase && (
-            <span className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider ${FASES_COLOR[partido.fase]}`}>
-              {FASES_NOMBRE[partido.fase]}
-            </span>
-          )}
-          {partido.grupo && (
-            <span className="bg-fwc-bg/50 border border-fwc-border text-gray-400 text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded">
-              Grupo {partido.grupo}
-            </span>
-          )}
-          {enVivo && (
-            <span className="bg-fwc-accent text-white text-[10px] sm:text-xs font-bold uppercase tracking-wider px-1.5 sm:px-2 py-0.5 rounded animate-pulse">
-              🔴 EN VIVO
-            </span>
+      {/* Badge EN VIVO o PRÓXIMO */}
+      {enVivo && (
+        <div className="absolute -top-2 left-3 bg-fwc-accent text-white text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wider animate-pulse">
+          🔴 EN VIVO
+        </div>
+      )}
+      {proximo && !enVivo && (
+        <div className="absolute -top-2 left-3 bg-fwc-neon text-fwc-bg text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wider">
+          ⏰ PRÓXIMO
+        </div>
+      )}
+
+      {/* Header: Fase + Favorito */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          {esFinal && <Trophy className="w-4 h-4 text-fwc-gold" />}
+          {esSemi && <Star className="w-3.5 h-3.5 text-fwc-gold" />}
+          <span className={`text-[10px] font-display font-bold uppercase tracking-widest px-2 py-0.5 rounded border ${colorFase[partido.fase]}`}>
+            {partido.fase === FASES.GRUPO 
+              ? `Grupo ${partido.grupo}` 
+              : nombreFase(partido.fase)}
+          </span>
+          {ecuadorJuega && (
+            <span className="text-base">🇪🇨</span>
           )}
         </div>
         
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 text-fwc-gold text-sm font-display font-bold">
-            <Clock className="w-3 h-3" />
-            {horaEc}
-          </div>
-          
-          <button
-            onClick={() => onToggleFavorito(partido.numero)}
-            className={`p-1.5 rounded transition-colors ${
+        <button
+          onClick={() => onToggleFavorito(partido.numero)}
+          className="p-1 transition-colors hover:scale-110"
+          title={esFavorito ? 'Quitar favorito' : 'Marcar favorito'}
+        >
+          <Heart 
+            className={`w-4 h-4 ${
               esFavorito 
-                ? 'text-fwc-gold' 
-                : 'text-gray-600 hover:text-fwc-gold'
-            }`}
-            title={esFavorito ? 'Quitar de favoritos' : 'Marcar favorito'}
-          >
-            <Star className={`w-4 h-4 ${esFavorito ? 'fill-fwc-gold' : ''}`} />
-          </button>
-        </div>
+                ? 'fill-fwc-accent text-fwc-accent' 
+                : 'text-gray-500 hover:text-fwc-accent'
+            }`} 
+          />
+        </button>
       </div>
 
       {/* Equipos */}
-      <div className="grid grid-cols-3 items-center gap-1 sm:gap-2 mb-3">
-        {/* Equipo 1 */}
-        <div className="flex flex-col items-center text-center">
-          {eq1Conocido ? (
-            <>
-              <Bandera iso={eq1Info.iso} size="xl" />
-              <p className="font-display font-bold text-white text-xs sm:text-sm mt-2 truncate w-full">
-                {eq1Info.nombre}
-              </p>
-            </>
+      <div className="space-y-2 mb-3">
+        {/* Equipo Local */}
+        <div className={`flex items-center gap-3 ${localEsPlaceholder ? 'opacity-60' : ''}`}>
+          {!localEsPlaceholder && equipoLocalInfo ? (
+            <Bandera iso={equipoLocalInfo.iso} size="md" />
           ) : (
-            <>
-              <div className="w-16 h-12 bg-fwc-bg/50 border border-fwc-border rounded flex items-center justify-center">
-                <Trophy className="w-6 h-6 text-gray-600" />
-              </div>
-              <p className="font-display font-bold text-gray-500 text-xs mt-2 truncate w-full">
-                {partido.equipo1}
-              </p>
-            </>
+            <div className="w-7 h-5 bg-fwc-card border border-fwc-border rounded flex items-center justify-center">
+              <span className="text-[10px] text-gray-500 font-mono">?</span>
+            </div>
           )}
+          <span className={`flex-1 truncate font-display font-bold text-sm ${
+            localEsPlaceholder ? 'text-gray-500 italic' :
+            equipoLocalNombre === 'Ecuador' ? 'text-fwc-gold' : 'text-white'
+          }`}>
+            {!localEsPlaceholder && equipoLocalInfo ? equipoLocalInfo.nombre : equipoLocalNombre}
+          </span>
         </div>
-        
-        {/* VS */}
-        <div className="text-center">
-          <p className="font-display font-black text-fwc-gold text-xl sm:text-2xl">VS</p>
-          {cuenta && !cuenta.enVivo && cuenta.dias < 7 && (
-            <p className="text-fwc-neon text-xs font-mono mt-1">
-              {cuenta.texto}
-            </p>
-          )}
+
+        {/* VS divisor */}
+        <div className="flex items-center gap-2 pl-10">
+          <div className="flex-1 h-px bg-fwc-border" />
+          <span className="text-gray-500 text-[10px] font-bold uppercase tracking-widest">vs</span>
+          <div className="flex-1 h-px bg-fwc-border" />
         </div>
-        
-        {/* Equipo 2 */}
-        <div className="flex flex-col items-center text-center">
-          {eq2Conocido ? (
-            <>
-              <Bandera iso={eq2Info.iso} size="xl" />
-              <p className="font-display font-bold text-white text-xs sm:text-sm mt-2 truncate w-full">
-                {eq2Info.nombre}
-              </p>
-            </>
+
+        {/* Equipo Visitante */}
+        <div className={`flex items-center gap-3 ${visitanteEsPlaceholder ? 'opacity-60' : ''}`}>
+          {!visitanteEsPlaceholder && equipoVisitanteInfo ? (
+            <Bandera iso={equipoVisitanteInfo.iso} size="md" />
           ) : (
-            <>
-              <div className="w-16 h-12 bg-fwc-bg/50 border border-fwc-border rounded flex items-center justify-center">
-                <Trophy className="w-6 h-6 text-gray-600" />
-              </div>
-              <p className="font-display font-bold text-gray-500 text-xs mt-2 truncate w-full">
-                {partido.equipo2}
-              </p>
-            </>
+            <div className="w-7 h-5 bg-fwc-card border border-fwc-border rounded flex items-center justify-center">
+              <span className="text-[10px] text-gray-500 font-mono">?</span>
+            </div>
           )}
+          <span className={`flex-1 truncate font-display font-bold text-sm ${
+            visitanteEsPlaceholder ? 'text-gray-500 italic' :
+            equipoVisitanteNombre === 'Ecuador' ? 'text-fwc-gold' : 'text-white'
+          }`}>
+            {!visitanteEsPlaceholder && equipoVisitanteInfo ? equipoVisitanteInfo.nombre : equipoVisitanteNombre}
+          </span>
         </div>
       </div>
 
-      {/* Footer: Sede + Canal */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-400 pt-3 border-t border-fwc-border">
-        <div className="flex items-center gap-1">
-          <MapPin className="w-3 h-3" />
-          <span>{sede?.ciudad || partido.sede}</span>
+      {/* Footer: Fecha, Hora, Sede, TV */}
+      <div className="border-t border-fwc-border pt-3 space-y-1.5">
+        {/* Fecha y hora */}
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-gray-400 font-mono uppercase">
+            {fechaFormateada}
+          </span>
+          <div className="flex items-center gap-1 text-fwc-gold font-mono font-bold">
+            <Clock className="w-3 h-3" />
+            <span>{partido.hora}</span>
+          </div>
         </div>
-        <div className="flex items-center gap-1">
-          <Tv className="w-3 h-3" />
-          <span className={canal ? 'text-fwc-neon font-bold' : 'text-gray-500'}>
-            {canal || 'Canal por confirmar'}
+
+        {/* Sede */}
+        <div className="flex items-start gap-1.5 text-xs text-gray-500">
+          <MapPin className="w-3 h-3 flex-shrink-0 mt-0.5" />
+          <span className="truncate">
+            {partido.sede.nombre} <span className="text-gray-600">- {partido.sede.ciudad}</span>
           </span>
         </div>
+
+        {/* Canal TV */}
+        {canal && (
+          <div className="flex items-center gap-1.5 text-xs text-fwc-neon">
+            <Tv className="w-3 h-3" />
+            <span className="font-bold uppercase tracking-wider">{canal}</span>
+          </div>
+        )}
       </div>
     </div>
   );
