@@ -214,7 +214,7 @@ function ListaPedidos({ pedidos, tipo, onCancelar, onMarcarRecibido, onAprobar, 
   );
 }
 
-fufunction PedidoCard({ pedido, tipo, onCancelar, onMarcarRecibido, onAprobar, procesando }) {
+function PedidoCard({ pedido, tipo, onCancelar, onMarcarRecibido, onAprobar, procesando }) {
   const eqInfo = getEquipoInfo(pedido.cromoEquipo);
   const persona = tipo === 'recibidos' ? pedido.deUsuarioNombre : pedido.paraUsuarioNombre;
   const personaFoto = tipo === 'recibidos' ? pedido.deUsuarioFoto : pedido.paraUsuarioFoto;
