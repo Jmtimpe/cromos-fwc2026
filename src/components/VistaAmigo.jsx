@@ -11,7 +11,7 @@ import {
   CheckCircle2,
   AlertCircle,
 } from 'lucide-react';
-import { fetchCatalog } from '../lib/inventario';
+import { fetchCatalog } from '../lib/seedCromos';
 import { observeInventarioAmigo, procesarEntregaCromo } from '../lib/inventario';
 import { getEquipoInfo } from '../lib/equiposData';
 import { appCache } from '../lib/cache';
