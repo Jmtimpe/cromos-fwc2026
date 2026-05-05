@@ -130,3 +130,17 @@ export const tienePedidoActivo = async (miUid, paraUsuarioId, cromoNumero) => {
     return false;
   }
 };
+// Aprobar un pedido (lo hace el DUEÑO)
+// Esto significa "OK, te lo guardo, ven por él"
+export const aprobarPedido = async (pedidoId) => {
+  try {
+    await updateDoc(doc(db, PEDIDOS_COL, pedidoId), {
+      estado: 'aprobado',
+      fechaAprobacion: serverTimestamp(),
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error aprobando pedido:', error);
+    return { success: false, error: error.message };
+  }
+};

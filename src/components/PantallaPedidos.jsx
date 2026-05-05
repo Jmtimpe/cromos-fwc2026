@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Inbox, Send, Package, CheckCircle2, XCircle, 
-  Clock, ArrowDown, ArrowUp, Loader2, ShoppingCart
+  Clock, ArrowDown, ArrowUp, Loader2, ShoppingCart,
+  ThumbsUp, Gift
 } from 'lucide-react';
 import { 
   observarPedidosEnviados, 
   observarPedidosRecibidos,
   cancelarPedido,
-  marcarRecibido
+  marcarRecibido,
+  aprobarPedido
 } from '../lib/pedidos';
 import { procesarEntregaCromo } from '../lib/inventario';
 import { getEquipoInfo } from '../lib/equiposData';
@@ -73,6 +75,12 @@ function PantallaPedidos({ user }) {
     
     setProcesando(null);
   };
+  const handleAprobar = async (pedido) => {
+    if (!window.confirm(`¿Apartar el cromo ${pedido.cromoCodigo} para ${pedido.deUsuarioNombre}?`)) return;
+    setProcesando(pedido.id);
+    await aprobarPedido(pedido.id);
+    setProcesando(null);
+  };
 
   // Filtrar solo pendientes para los contadores
   const recibidosPendientes = pedidosRecibidos.filter(p => p.estado === 'pendiente');
@@ -130,6 +138,7 @@ function PantallaPedidos({ user }) {
           pedidos={pedidosRecibidos}
           tipo="recibidos"
           onCancelar={handleCancelar}
+          onAprobar={handleAprobar}
           procesando={procesando}
         />
       ) : (
@@ -169,7 +178,7 @@ function TabBtn({ activa, onClick, icon, label, count, color = 'gold' }) {
   );
 }
 
-function ListaPedidos({ pedidos, tipo, onCancelar, onMarcarRecibido, procesando }) {
+function ListaPedidos({ pedidos, tipo, onCancelar, onMarcarRecibido, onAprobar, procesando }) {
   if (pedidos.length === 0) {
     return (
       <div className="fwc-card p-12 text-center">
@@ -192,19 +201,20 @@ function ListaPedidos({ pedidos, tipo, onCancelar, onMarcarRecibido, procesando 
     <div className="space-y-3">
       {pedidos.map(pedido => (
         <PedidoCard
-          key={pedido.id}
-          pedido={pedido}
-          tipo={tipo}
-          onCancelar={onCancelar}
-          onMarcarRecibido={onMarcarRecibido}
-          procesando={procesando === pedido.id}
-        />
+        key={pedido.id}
+        pedido={pedido}
+        tipo={tipo}
+        onCancelar={onCancelar}
+        onMarcarRecibido={onMarcarRecibido}
+        onAprobar={onAprobar}
+        procesando={procesando === pedido.id}
+      />
       ))}
     </div>
   );
 }
 
-function PedidoCard({ pedido, tipo, onCancelar, onMarcarRecibido, procesando }) {
+fufunction PedidoCard({ pedido, tipo, onCancelar, onMarcarRecibido, onAprobar, procesando }) {
   const eqInfo = getEquipoInfo(pedido.cromoEquipo);
   const persona = tipo === 'recibidos' ? pedido.deUsuarioNombre : pedido.paraUsuarioNombre;
   const personaFoto = tipo === 'recibidos' ? pedido.deUsuarioFoto : pedido.paraUsuarioFoto;
@@ -216,6 +226,12 @@ function PedidoCard({ pedido, tipo, onCancelar, onMarcarRecibido, procesando }) 
       icon: <Clock className="w-4 h-4" />,
       label: 'Pendiente',
       color: 'text-fwc-gold'
+    },
+    aprobado: { 
+      borderColor: 'border-fwc-neon/40',
+      icon: <Gift className="w-4 h-4" />,
+      label: 'Apartado',
+      color: 'text-fwc-neon'
     },
     recibido: { 
       borderColor: 'border-green-500/40',
@@ -284,19 +300,45 @@ function PedidoCard({ pedido, tipo, onCancelar, onMarcarRecibido, procesando }) 
             {estilo.label}
           </div>
 
-          {/* Botones según contexto */}
-          {pedido.estado === 'pendiente' && (
-            <div className="flex gap-2">
-              {tipo === 'enviados' && (
+          {/* Botones según contexto y estado */}
+          <div className="flex flex-wrap gap-2 justify-end">
+            
+            {/* PENDIENTE en recibidos: dueño puede APROBAR o CANCELAR */}
+            {pedido.estado === 'pendiente' && tipo === 'recibidos' && (
+              <>
                 <button
-                  onClick={() => onMarcarRecibido(pedido)}
+                  onClick={() => onAprobar(pedido)}
                   disabled={procesando}
-                  className="px-3 py-1.5 bg-green-500/20 border border-green-500/40 text-green-400 hover:bg-green-500 hover:text-white font-display font-bold uppercase tracking-wider text-xs rounded-lg transition-all flex items-center gap-1 disabled:opacity-50"
+                  className="px-3 py-1.5 bg-fwc-neon/20 border border-fwc-neon/40 text-fwc-neon hover:bg-fwc-neon hover:text-fwc-bg font-display font-bold uppercase tracking-wider text-xs rounded-lg transition-all flex items-center gap-1 disabled:opacity-50"
                 >
-                  {procesando ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
-                  Ya lo tengo
+                  {procesando ? <Loader2 className="w-3 h-3 animate-spin" /> : <ThumbsUp className="w-3 h-3" />}
+                  Aprobar
                 </button>
-              )}
+                <button
+                  onClick={() => onCancelar(pedido)}
+                  disabled={procesando}
+                  className="px-3 py-1.5 border border-fwc-border text-gray-400 hover:border-fwc-accent hover:text-fwc-accent font-display font-bold uppercase tracking-wider text-xs rounded-lg transition-all flex items-center gap-1 disabled:opacity-50"
+                >
+                  <XCircle className="w-3 h-3" />
+                  Rechazar
+                </button>
+              </>
+            )}
+
+            {/* APROBADO en recibidos: dueño espera */}
+            {pedido.estado === 'aprobado' && tipo === 'recibidos' && (
+              <button
+                onClick={() => onCancelar(pedido)}
+                disabled={procesando}
+                className="px-3 py-1.5 border border-fwc-border text-gray-400 hover:border-fwc-accent hover:text-fwc-accent font-display font-bold uppercase tracking-wider text-xs rounded-lg transition-all flex items-center gap-1 disabled:opacity-50"
+              >
+                <XCircle className="w-3 h-3" />
+                Cancelar
+              </button>
+            )}
+
+            {/* PENDIENTE en enviados: solo cancelar */}
+            {pedido.estado === 'pendiente' && tipo === 'enviados' && (
               <button
                 onClick={() => onCancelar(pedido)}
                 disabled={procesando}
@@ -305,8 +347,30 @@ function PedidoCard({ pedido, tipo, onCancelar, onMarcarRecibido, procesando }) 
                 {procesando ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3 h-3" />}
                 Cancelar
               </button>
-            </div>
-          )}
+            )}
+
+            {/* APROBADO en enviados: el receptor puede confirmar que ya lo tiene */}
+            {pedido.estado === 'aprobado' && tipo === 'enviados' && (
+              <>
+                <button
+                  onClick={() => onMarcarRecibido(pedido)}
+                  disabled={procesando}
+                  className="px-3 py-1.5 bg-green-500/20 border border-green-500/40 text-green-400 hover:bg-green-500 hover:text-white font-display font-bold uppercase tracking-wider text-xs rounded-lg transition-all flex items-center gap-1 disabled:opacity-50"
+                >
+                  {procesando ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
+                  Ya lo tengo
+                </button>
+                <button
+                  onClick={() => onCancelar(pedido)}
+                  disabled={procesando}
+                  className="px-3 py-1.5 border border-fwc-border text-gray-400 hover:border-fwc-accent hover:text-fwc-accent font-display font-bold uppercase tracking-wider text-xs rounded-lg transition-all flex items-center gap-1 disabled:opacity-50"
+                >
+                  <XCircle className="w-3 h-3" />
+                  Cancelar
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

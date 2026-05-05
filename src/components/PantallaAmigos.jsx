@@ -32,22 +32,40 @@ function PantallaAmigos({ user, onVerAmigo }) {
   }, [user.uid]);
   // Detectar si vino con un link de invitación (?invitar=CODIGO)
   useEffect(() => {
-    if (loading || yaProceseInvitacion.current) return;
+    if (loading || yaProceseInvitacion.current || !miPerfil) return;
     
-    const params = new URLSearchParams(window.location.search);
-    const codigoInvitacion = params.get('invitar');
+    let codigoInvitacion = null;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      codigoInvitacion = params.get('invitar');
+    } catch (e) {
+      console.error('Error leyendo URL:', e);
+      return;
+    }
     
-    if (codigoInvitacion && miPerfil) {
-      yaProceseInvitacion.current = true;
-      // Auto-buscar el código de invitación
-      setCodigoBuscar(codigoInvitacion.toUpperCase());
-      
-      // Disparar la búsqueda automáticamente después de 500ms
-      setTimeout(async () => {
+    if (!codigoInvitacion || codigoInvitacion.trim() === '') {
+      // Si hay un "?" vacío en la URL, limpiarlo
+      if (window.location.search) {
+        try {
+          window.history.replaceState({}, '', window.location.pathname);
+        } catch (e) {
+          console.error('Error limpiando URL:', e);
+        }
+      }
+      return;
+    }
+    
+    yaProceseInvitacion.current = true;
+    const codigoLimpio = codigoInvitacion.toUpperCase().trim();
+    setCodigoBuscar(codigoLimpio);
+    
+    // Disparar la búsqueda automáticamente
+    const timer = setTimeout(async () => {
+      try {
         setBuscando(true);
-        setMensaje({ tipo: 'info', texto: `Buscando a tu amigo con código ${codigoInvitacion.toUpperCase()}...` });
+        setMensaje({ tipo: 'info', texto: `Buscando a tu amigo con código ${codigoLimpio}...` });
         
-        const result = await buscarPorCodigo(codigoInvitacion);
+        const result = await buscarPorCodigo(codigoLimpio);
         
         if (result.success) {
           if (result.usuario.uid === user.uid) {
@@ -61,14 +79,21 @@ function PantallaAmigos({ user, onVerAmigo }) {
         } else {
           setMensaje({ tipo: 'error', texto: 'No encontramos a nadie con ese código. Verifica que sea correcto.' });
         }
-        
+      } catch (error) {
+        console.error('Error procesando invitación:', error);
+        setMensaje({ tipo: 'error', texto: 'Hubo un error procesando la invitación. Intenta de nuevo.' });
+      } finally {
         setBuscando(false);
-        
-        // Limpiar el parámetro de la URL para que no quede colgado
-        const newUrl = window.location.pathname;
-        window.history.replaceState({}, '', newUrl);
-      }, 500);
-    }
+        // Limpiar el parámetro de la URL
+        try {
+          window.history.replaceState({}, '', window.location.pathname);
+        } catch (e) {
+          console.error('Error limpiando URL:', e);
+        }
+      }
+    }, 800);
+    
+    return () => clearTimeout(timer);
   }, [loading, miPerfil, amigos, user.uid]);
 
   useEffect(() => {
