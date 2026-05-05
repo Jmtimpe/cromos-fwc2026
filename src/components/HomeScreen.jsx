@@ -40,6 +40,15 @@ function HomeScreen({ user }) {
 
   const [canalesPartidos] = useState({});
 
+  // 🔍 LOG DE DEBUG: ver qué se está renderizando
+  useEffect(() => {
+    console.log('🔍 [HomeScreen] Estado actualizado:', {
+      pestañaActiva,
+      amigoVisualizando: amigoVisualizando ? amigoVisualizando.displayName : null,
+      showSeedPanel,
+    });
+  }, [pestañaActiva, amigoVisualizando, showSeedPanel]);
+
   useEffect(() => {
     if (!user?.uid) return;
     const unsub = observeInventario(user.uid, setMiInventario);
@@ -75,63 +84,22 @@ function HomeScreen({ user }) {
     await signOut();
   };
 
-  // Helper para cambiar de pestaña Y salir del perfil del amigo
+  // Cambiar de pestaña + salir del perfil del amigo
   const cambiarPestaña = (nuevaPestaña) => {
-    setPestañaActiva(nuevaPestaña);
+    console.log('🔵 [cambiarPestaña] Cambiando a:', nuevaPestaña);
     setAmigoVisualizando(null);
+    setPestañaActiva(nuevaPestaña);
   };
 
-  // Helper para abrir el álbum de un amigo
+  // Abrir el álbum de un amigo
   const handleVerAmigo = (amigo) => {
+    console.log('🟢 [handleVerAmigo] Amigo recibido:', amigo);
+    if (!amigo || !amigo.uid) {
+      console.error('❌ [handleVerAmigo] Amigo inválido:', amigo);
+      return;
+    }
     setAmigoVisualizando(amigo);
-    // Importante: mantenemos la pestaña activa para que el menú resalte "Amigos"
-    setPestañaActiva('amigos');
-  };
-
-  // Determinar QUÉ se muestra en el contenido principal
-  // PRIORIDAD: 1) Panel admin > 2) Álbum de amigo > 3) Pestaña activa
-  const renderContenido = () => {
-    if (showSeedPanel) {
-      return <SeedPanel onClose={() => setShowSeedPanel(false)} />;
-    }
-
-    if (amigoVisualizando) {
-      return (
-        <VistaAmigo
-          amigo={amigoVisualizando}
-          miInventario={miInventario}
-          miUsuario={user}
-          onVolver={() => setAmigoVisualizando(null)}
-        />
-      );
-    }
-
-    switch (pestañaActiva) {
-      case 'album':
-        return <Inventario user={user} />;
-      case 'amigos':
-        return <PantallaAmigos user={user} onVerAmigo={handleVerAmigo} />;
-      case 'pedidos':
-        return <PantallaPedidos user={user} />;
-      case 'hoy':
-        return (
-          <PartidosHoy
-            favoritos={favoritos}
-            onToggleFavorito={handleToggleFavorito}
-            canalesPartidos={canalesPartidos}
-          />
-        );
-      case 'calendario':
-        return (
-          <Calendario
-            favoritos={favoritos}
-            onToggleFavorito={handleToggleFavorito}
-            canalesPartidos={canalesPartidos}
-          />
-        );
-      default:
-        return <Inventario user={user} />;
-    }
+    // NO cambiamos pestañaActiva aquí — la dejamos en 'amigos'
   };
 
   return (
@@ -152,7 +120,6 @@ function HomeScreen({ user }) {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Panel de admin (solo visible para el creador) */}
             {user.email === 'jose.timpe@gmail.com' && (
               <button
                 onClick={() => setShowSeedPanel(!showSeedPanel)}
@@ -231,10 +198,65 @@ function HomeScreen({ user }) {
       </header>
 
       <main className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8 flex-1 w-full">
-        {renderContenido()}
+        {/* RENDERIZADO CON PRIORIDAD ESTRICTA - Logs incluidos */}
+        {(() => {
+          // PRIORIDAD 1: Panel admin
+          if (showSeedPanel) {
+            console.log('📦 Renderizando: SeedPanel');
+            return <SeedPanel onClose={() => setShowSeedPanel(false)} />;
+          }
+          
+          // PRIORIDAD 2: Vista de amigo (¡SIEMPRE prioritario sobre cualquier pestaña!)
+          if (amigoVisualizando) {
+            console.log('👁️ Renderizando: VistaAmigo de', amigoVisualizando.displayName);
+            return (
+              <VistaAmigo
+                amigo={amigoVisualizando}
+                miInventario={miInventario}
+                miUsuario={user}
+                onVolver={() => setAmigoVisualizando(null)}
+              />
+            );
+          }
+          
+          // PRIORIDAD 3: Pestaña activa
+          console.log('📑 Renderizando pestaña:', pestañaActiva);
+          
+          if (pestañaActiva === 'album') {
+            return <Inventario user={user} />;
+          }
+          if (pestañaActiva === 'amigos') {
+            return <PantallaAmigos user={user} onVerAmigo={handleVerAmigo} />;
+          }
+          if (pestañaActiva === 'pedidos') {
+            return <PantallaPedidos user={user} />;
+          }
+          if (pestañaActiva === 'hoy') {
+            return (
+              <PartidosHoy
+                favoritos={favoritos}
+                onToggleFavorito={handleToggleFavorito}
+                canalesPartidos={canalesPartidos}
+              />
+            );
+          }
+          if (pestañaActiva === 'calendario') {
+            return (
+              <Calendario
+                favoritos={favoritos}
+                onToggleFavorito={handleToggleFavorito}
+                canalesPartidos={canalesPartidos}
+              />
+            );
+          }
+          
+          // Fallback de seguridad
+          console.warn('⚠️ Ninguna pestaña coincidió, mostrando Inventario');
+          return <Inventario user={user} />;
+        })()}
       </main>
 
-      {/* Footer con firma profesional */}
+      {/* Footer */}
       <footer className="border-t border-fwc-border bg-fwc-card/30 backdrop-blur-sm mt-auto">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
