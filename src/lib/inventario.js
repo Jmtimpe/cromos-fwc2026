@@ -1,68 +1,126 @@
-// Funciones para gestionar el inventario personal del usuario
-import { 
-  collection, 
-  doc, 
-  setDoc, 
-  getDocs, 
-  getDoc,
+// Gestión del inventario de cromos del usuario
+import {
+  doc,
+  setDoc,
+  collection,
   onSnapshot,
-  query
+  serverTimestamp,
+  getDoc,
 } from 'firebase/firestore';
 import { db } from './firebase';
 
-// Obtiene la referencia a la colección del inventario del usuario actual
-const getInventarioRef = (userId) => {
-  return collection(db, 'usuarios', userId, 'inventario');
-};
+const USUARIOS_COL = 'usuarios';
+const INVENTARIO_SUBCOL = 'inventario';
 
-// Actualiza el estado de un cromo específico
-// estado: 0 = Faltante, 1 = Obtenido, 2+ = Repetidas (cantidad total)
-export const updateCromoEstado = async (userId, numeroCromo, estado) => {
+// Actualizar la cantidad de un cromo en el inventario del usuario
+export const actualizarCantidad = async (userId, numeroCromo, cantidad) => {
   try {
-    const docId = String(numeroCromo).padStart(4, '0');
-    const ref = doc(db, 'usuarios', userId, 'inventario', docId);
-    
-    if (estado === 0) {
-      // Si está en 0, lo guardamos pero también podríamos borrarlo
-      await setDoc(ref, { 
-        numero: numeroCromo, 
-        cantidad: 0,
-        actualizado: new Date().toISOString()
-      });
-    } else {
-      await setDoc(ref, { 
-        numero: numeroCromo, 
-        cantidad: estado,
-        actualizado: new Date().toISOString()
-      });
-    }
-    
+    const cromoId = String(numeroCromo).padStart(4, '0');
+    const inventarioRef = doc(
+      db,
+      USUARIOS_COL,
+      userId,
+      INVENTARIO_SUBCOL,
+      cromoId
+    );
+
+    await setDoc(
+      inventarioRef,
+      {
+        numero: numeroCromo,
+        cantidad: cantidad,
+        actualizado: serverTimestamp(),
+      },
+      { merge: true }
+    );
+
     return { success: true };
   } catch (error) {
-    console.error('Error actualizando cromo:', error);
+    console.error('Error actualizando cantidad:', error);
     return { success: false, error: error.message };
   }
 };
 
-// Obtiene todo el inventario del usuario (una sola vez)
-export const fetchInventario = async (userId) => {
+// Sumar 1 al inventario (cuando el receptor confirma "ya lo tengo")
+export const sumarUnoAlInventario = async (userId, numeroCromo) => {
   try {
-    const snapshot = await getDocs(getInventarioRef(userId));
-    const inventario = {};
-    snapshot.forEach((doc) => {
-      const data = doc.data();
-      inventario[data.numero] = data.cantidad;
-    });
-    return inventario;
+    const cromoId = String(numeroCromo).padStart(4, '0');
+    const inventarioRef = doc(
+      db,
+      USUARIOS_COL,
+      userId,
+      INVENTARIO_SUBCOL,
+      cromoId
+    );
+
+    // Leer cantidad actual
+    const snap = await getDoc(inventarioRef);
+    const cantidadActual = snap.exists() ? snap.data().cantidad || 0 : 0;
+
+    await setDoc(
+      inventarioRef,
+      {
+        numero: numeroCromo,
+        cantidad: cantidadActual + 1,
+        actualizado: serverTimestamp(),
+      },
+      { merge: true }
+    );
+
+    return { success: true, cantidadNueva: cantidadActual + 1 };
   } catch (error) {
-    console.error('Error leyendo inventario:', error);
-    return {};
+    console.error('Error sumando al inventario:', error);
+    return { success: false, error: error.message };
   }
 };
 
-// Escucha cambios en el inventario en tiempo real
+// Restar 1 del inventario (cuando el dueño aprueba un pedido)
+export const restarUnoDelInventario = async (userId, numeroCromo) => {
+  try {
+    const cromoId = String(numeroCromo).padStart(4, '0');
+    const inventarioRef = doc(
+      db,
+      USUARIOS_COL,
+      userId,
+      INVENTARIO_SUBCOL,
+      cromoId
+    );
+
+    // Leer cantidad actual
+    const snap = await getDoc(inventarioRef);
+    const cantidadActual = snap.exists() ? snap.data().cantidad || 0 : 0;
+
+    if (cantidadActual <= 0) {
+      return { success: false, error: 'No tienes ese cromo en tu inventario' };
+    }
+
+    await setDoc(
+      inventarioRef,
+      {
+        numero: numeroCromo,
+        cantidad: cantidadActual - 1,
+        actualizado: serverTimestamp(),
+      },
+      { merge: true }
+    );
+
+    return { success: true, cantidadNueva: cantidadActual - 1 };
+  } catch (error) {
+    console.error('Error restando del inventario:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Observador en tiempo real del inventario propio
 export const observeInventario = (userId, callback) => {
-  return onSnapshot(getInventarioRef(userId), (snapshot) => {
+  const inventarioRef = collection(
+    db,
+    USUARIOS_COL,
+    userId,
+    INVENTARIO_SUBCOL
+  );
+
+  const unsubscribe = onSnapshot(inventarioRef, (snapshot) => {
     const inventario = {};
     snapshot.forEach((doc) => {
       const data = doc.data();
@@ -70,75 +128,27 @@ export const observeInventario = (userId, callback) => {
     });
     callback(inventario);
   });
+
+  return unsubscribe;
 };
-// Obtener el inventario de un amigo (lectura)
-export const fetchInventarioAmigo = async (amigoUid) => {
-  try {
-    const snapshot = await getDocs(collection(db, 'usuarios', amigoUid, 'inventario'));
+
+// Observador del inventario de un amigo (read-only)
+export const observeInventarioAmigo = (amigoUid, callback) => {
+  const inventarioRef = collection(
+    db,
+    USUARIOS_COL,
+    amigoUid,
+    INVENTARIO_SUBCOL
+  );
+
+  const unsubscribe = onSnapshot(inventarioRef, (snapshot) => {
     const inventario = {};
     snapshot.forEach((doc) => {
       const data = doc.data();
       inventario[data.numero] = data.cantidad;
     });
-    return { success: true, inventario };
-  } catch (error) {
-    console.error('Error leyendo inventario del amigo:', error);
-    return { success: false, error: error.message, inventario: {} };
-  }
-};
+    callback(inventario);
+  });
 
-// Escuchar inventario de un amigo en tiempo real
-export const observeInventarioAmigo = (amigoUid, callback) => {
-  return onSnapshot(
-    collection(db, 'usuarios', amigoUid, 'inventario'),
-    (snapshot) => {
-      const inventario = {};
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        inventario[data.numero] = data.cantidad;
-      });
-      callback(inventario);
-    }
-  );
-};
-// Procesar la entrega física de un cromo entre 2 usuarios
-// Usa lectura previa para no duplicar/restar mal
-export const procesarEntregaCromo = async (deUsuarioId, paraUsuarioId, numeroCromo) => {
-  try {
-    const docId = String(numeroCromo).padStart(4, '0');
-    
-    // Leer cantidad actual del DUEÑO (deUsuario)
-    const refDueno = doc(db, 'usuarios', deUsuarioId, 'inventario', docId);
-    const snapDueno = await getDoc(refDueno);
-    const cantDueno = snapDueno.exists() ? (snapDueno.data().cantidad || 0) : 0;
-    
-    // Leer cantidad actual del RECEPTOR (paraUsuario)
-    const refRec = doc(db, 'usuarios', paraUsuarioId, 'inventario', docId);
-    const snapRec = await getDoc(refRec);
-    const cantRec = snapRec.exists() ? (snapRec.data().cantidad || 0) : 0;
-    
-    // Solo procesar si el dueño aún tiene repes (cantidad >= 2)
-    if (cantDueno < 2) {
-      return { success: false, error: 'El dueño ya no tiene repetidos de ese cromo' };
-    }
-    
-    // Restar 1 al dueño
-    await setDoc(refDueno, {
-      numero: numeroCromo,
-      cantidad: cantDueno - 1,
-      actualizado: new Date().toISOString()
-    });
-    
-    // Sumar 1 al receptor (si era 0 → ahora 1, si tenía 1 → ahora 2 repe)
-    await setDoc(refRec, {
-      numero: numeroCromo,
-      cantidad: cantRec + 1,
-      actualizado: new Date().toISOString()
-    });
-    
-    return { success: true };
-  } catch (error) {
-    console.error('Error procesando entrega:', error);
-    return { success: false, error: error.message };
-  }
+  return unsubscribe;
 };
