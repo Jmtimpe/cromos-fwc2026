@@ -12,8 +12,10 @@ import { db } from './firebase';
 const USUARIOS_COL = 'usuarios';
 const INVENTARIO_SUBCOL = 'inventario';
 
-// Actualizar la cantidad de un cromo en el inventario del usuario
-export const actualizarCantidad = async (userId, numeroCromo, cantidad) => {
+// ============================================================================
+// FUNCIÓN ORIGINAL: Usada por los botones + / - en Inventario.jsx
+// ============================================================================
+export const updateCromoEstado = async (userId, numeroCromo, cantidad) => {
   try {
     const cromoId = String(numeroCromo).padStart(4, '0');
     const inventarioRef = doc(
@@ -36,10 +38,17 @@ export const actualizarCantidad = async (userId, numeroCromo, cantidad) => {
 
     return { success: true };
   } catch (error) {
-    console.error('Error actualizando cantidad:', error);
+    console.error('Error actualizando cromo:', error);
     return { success: false, error: error.message };
   }
 };
+
+// Alias por compatibilidad (mismo nombre alternativo)
+export const actualizarCantidad = updateCromoEstado;
+
+// ============================================================================
+// SUMAR / RESTAR: Para el sistema de pedidos (split-transaction)
+// ============================================================================
 
 // Sumar 1 al inventario (cuando el receptor confirma "ya lo tengo")
 export const sumarUnoAlInventario = async (userId, numeroCromo) => {
@@ -53,7 +62,6 @@ export const sumarUnoAlInventario = async (userId, numeroCromo) => {
       cromoId
     );
 
-    // Leer cantidad actual
     const snap = await getDoc(inventarioRef);
     const cantidadActual = snap.exists() ? snap.data().cantidad || 0 : 0;
 
@@ -86,7 +94,6 @@ export const restarUnoDelInventario = async (userId, numeroCromo) => {
       cromoId
     );
 
-    // Leer cantidad actual
     const snap = await getDoc(inventarioRef);
     const cantidadActual = snap.exists() ? snap.data().cantidad || 0 : 0;
 
@@ -110,6 +117,10 @@ export const restarUnoDelInventario = async (userId, numeroCromo) => {
     return { success: false, error: error.message };
   }
 };
+
+// ============================================================================
+// OBSERVADORES EN TIEMPO REAL
+// ============================================================================
 
 // Observador en tiempo real del inventario propio
 export const observeInventario = (userId, callback) => {
