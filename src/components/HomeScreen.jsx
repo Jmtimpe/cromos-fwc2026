@@ -75,6 +75,65 @@ function HomeScreen({ user }) {
     await signOut();
   };
 
+  // Helper para cambiar de pestaña Y salir del perfil del amigo
+  const cambiarPestaña = (nuevaPestaña) => {
+    setPestañaActiva(nuevaPestaña);
+    setAmigoVisualizando(null);
+  };
+
+  // Helper para abrir el álbum de un amigo
+  const handleVerAmigo = (amigo) => {
+    setAmigoVisualizando(amigo);
+    // Importante: mantenemos la pestaña activa para que el menú resalte "Amigos"
+    setPestañaActiva('amigos');
+  };
+
+  // Determinar QUÉ se muestra en el contenido principal
+  // PRIORIDAD: 1) Panel admin > 2) Álbum de amigo > 3) Pestaña activa
+  const renderContenido = () => {
+    if (showSeedPanel) {
+      return <SeedPanel onClose={() => setShowSeedPanel(false)} />;
+    }
+
+    if (amigoVisualizando) {
+      return (
+        <VistaAmigo
+          amigo={amigoVisualizando}
+          miInventario={miInventario}
+          miUsuario={user}
+          onVolver={() => setAmigoVisualizando(null)}
+        />
+      );
+    }
+
+    switch (pestañaActiva) {
+      case 'album':
+        return <Inventario user={user} />;
+      case 'amigos':
+        return <PantallaAmigos user={user} onVerAmigo={handleVerAmigo} />;
+      case 'pedidos':
+        return <PantallaPedidos user={user} />;
+      case 'hoy':
+        return (
+          <PartidosHoy
+            favoritos={favoritos}
+            onToggleFavorito={handleToggleFavorito}
+            canalesPartidos={canalesPartidos}
+          />
+        );
+      case 'calendario':
+        return (
+          <Calendario
+            favoritos={favoritos}
+            onToggleFavorito={handleToggleFavorito}
+            canalesPartidos={canalesPartidos}
+          />
+        );
+      default:
+        return <Inventario user={user} />;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-fwc-bg flex flex-col">
       {/* Header */}
@@ -138,47 +197,32 @@ function HomeScreen({ user }) {
           <div className="max-w-7xl mx-auto px-3 sm:px-6 flex gap-1 -mb-px overflow-x-auto scrollbar-hide">
             <PestañaBtn
               activa={pestañaActiva === 'album' && !amigoVisualizando}
-              onClick={() => {
-                setPestañaActiva('album');
-                setAmigoVisualizando(null);
-              }}
+              onClick={() => cambiarPestaña('album')}
               icon={<BookOpen className="w-4 h-4" />}
               label="Mi Álbum"
             />
             <PestañaBtn
-              activa={pestañaActiva === 'amigos' && !amigoVisualizando}
-              onClick={() => {
-                setPestañaActiva('amigos');
-                setAmigoVisualizando(null);
-              }}
+              activa={pestañaActiva === 'amigos'}
+              onClick={() => cambiarPestaña('amigos')}
               icon={<Users className="w-4 h-4" />}
               label="Amigos"
             />
             <PestañaBtn
               activa={pestañaActiva === 'pedidos' && !amigoVisualizando}
-              onClick={() => {
-                setPestañaActiva('pedidos');
-                setAmigoVisualizando(null);
-              }}
+              onClick={() => cambiarPestaña('pedidos')}
               icon={<ShoppingCart className="w-4 h-4" />}
-              label="Pedidos"
+              label="Solicitudes"
               badge={pedidosPendientes > 0 ? pedidosPendientes : null}
             />
             <PestañaBtn
               activa={pestañaActiva === 'hoy' && !amigoVisualizando}
-              onClick={() => {
-                setPestañaActiva('hoy');
-                setAmigoVisualizando(null);
-              }}
+              onClick={() => cambiarPestaña('hoy')}
               icon={<Sun className="w-4 h-4" />}
               label="Hoy"
             />
             <PestañaBtn
               activa={pestañaActiva === 'calendario' && !amigoVisualizando}
-              onClick={() => {
-                setPestañaActiva('calendario');
-                setAmigoVisualizando(null);
-              }}
+              onClick={() => cambiarPestaña('calendario')}
               icon={<Calendar className="w-4 h-4" />}
               label="Calendario"
             />
@@ -187,34 +231,7 @@ function HomeScreen({ user }) {
       </header>
 
       <main className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8 flex-1 w-full">
-        {showSeedPanel ? (
-          <SeedPanel onClose={() => setShowSeedPanel(false)} />
-        ) : amigoVisualizando ? (
-          <VistaAmigo
-            amigo={amigoVisualizando}
-            miInventario={miInventario}
-            miUsuario={user}
-            onVolver={() => setAmigoVisualizando(null)}
-          />
-        ) : pestañaActiva === 'album' ? (
-          <Inventario user={user} />
-        ) : pestañaActiva === 'amigos' ? (
-          <PantallaAmigos user={user} onVerAmigo={setAmigoVisualizando} />
-        ) : pestañaActiva === 'pedidos' ? (
-          <PantallaPedidos user={user} />
-        ) : pestañaActiva === 'hoy' ? (
-          <PartidosHoy
-            favoritos={favoritos}
-            onToggleFavorito={handleToggleFavorito}
-            canalesPartidos={canalesPartidos}
-          />
-        ) : (
-          <Calendario
-            favoritos={favoritos}
-            onToggleFavorito={handleToggleFavorito}
-            canalesPartidos={canalesPartidos}
-          />
-        )}
+        {renderContenido()}
       </main>
 
       {/* Footer con firma profesional */}
