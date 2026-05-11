@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Loader2, BookOpen, ChevronDown, ChevronRight, Inbox } from 'lucide-react';
+import { Loader2, BookOpen, ChevronDown, ChevronRight, Inbox, CheckCircle2 } from 'lucide-react';
 import { fetchCatalog } from '../lib/seedCromos';
 import { observeInventario, updateCromoEstado } from '../lib/inventario';
 import { getEquipoInfo } from '../lib/equiposData';
+import { exportarFaltantesPDF } from '../lib/exportarPDF';
 import CromoCard from './CromoCard';
 import Bandera from './Bandera';
 import FiltrosBar from './FiltrosBar';
@@ -19,6 +20,10 @@ function Inventario({ user }) {
   const [busqueda, setBusqueda] = useState('');
   const [filtroEstado, setFiltroEstado] = useState('todos');
   const [filtroTipo, setFiltroTipo] = useState('todos');
+
+  // Estado de exportación PDF
+  const [generandoPDF, setGenerandoPDF] = useState(false);
+  const [mensajePDF, setMensajePDF] = useState('');
 
   // Cargar catálogo (con caché)
   useEffect(() => {
@@ -59,6 +64,39 @@ function Inventario({ user }) {
 
   const toggleEquipo = (equipoKey) => {
     setEquiposAbiertos(prev => ({ ...prev, [equipoKey]: !prev[equipoKey] }));
+  };
+
+  // ============= EXPORTAR PDF =============
+  const handleExportarPDF = async () => {
+    if (catalogo.length === 0) {
+      setMensajePDF('Espera a que cargue el catálogo');
+      setTimeout(() => setMensajePDF(''), 3000);
+      return;
+    }
+
+    setGenerandoPDF(true);
+    setMensajePDF('');
+
+    try {
+      // Pequeño delay para que se vea el spinner
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      const result = exportarFaltantesPDF({
+        catalogo,
+        inventario,
+        usuario: user,
+      });
+
+      if (result.success) {
+        setMensajePDF(`✅ PDF generado con ${result.totalFaltantes} cromos faltantes`);
+      }
+    } catch (error) {
+      console.error('Error generando PDF:', error);
+      setMensajePDF('❌ Error al generar el PDF. Intenta de nuevo.');
+    } finally {
+      setGenerandoPDF(false);
+      setTimeout(() => setMensajePDF(''), 4000);
+    }
   };
 
   // ============= FILTRADO =============
@@ -189,7 +227,7 @@ function Inventario({ user }) {
         </div>
       </div>
 
-      {/* Filtros */}
+      {/* Filtros + Botón PDF (STICKY) */}
       <FiltrosBar
         busqueda={busqueda}
         setBusqueda={setBusqueda}
@@ -199,7 +237,17 @@ function Inventario({ user }) {
         setFiltroTipo={setFiltroTipo}
         totalVisible={cromosFiltrados.length}
         totalGeneral={catalogo.length}
+        onExportarPDF={handleExportarPDF}
+        generandoPDF={generandoPDF}
       />
+
+      {/* Mensaje de exportación PDF */}
+      {mensajePDF && (
+        <div className="mb-4 fwc-card p-3 flex items-center gap-2 border-fwc-gold/40 bg-fwc-gold/5">
+          <CheckCircle2 className="w-4 h-4 text-fwc-gold flex-shrink-0" />
+          <p className="text-sm text-white">{mensajePDF}</p>
+        </div>
+      )}
 
       {/* Mensaje si no hay resultados */}
       {seccionesVisibles.length === 0 && (
